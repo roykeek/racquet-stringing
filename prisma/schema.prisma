@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Manufacturer {
+  id            Int            @id @default(autoincrement())
+  name          String         @unique
+  racquetModels RacquetModel[]
+}
+
+model RacquetModel {
+  id             Int          @id @default(autoincrement())
+  name           String
+  manufacturerId Int
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  serviceJobs    ServiceJob[]
+
+  @@unique([name, manufacturerId])
+}
+
+model Stringer {
+  id                  Int          @id @default(autoincrement())
+  name                String       @unique
+  passwordHash        String
+  isActive            Boolean      @default(true)
+  failedLoginAttempts Int          @default(0)
+  lockedUntil         DateTime?
+  serviceJobs         ServiceJob[]
+}
+
+model ServiceJob {
+  id                Int           @id @default(autoincrement())
+  trackingUUID      String        @unique @default(uuid())
+  clientName        String
+  clientPhone       String
+  modelId           Int?
+  customRacquetInfo String?
+  stringTypes       String        // "Mains: Poly / Cross: Syn Gut"
+  mainsTensionLbs   Decimal
+  crossTensionLbs   Decimal
+  racquetCount      Int           @default(1)
+  urgency           String        // 'Standard', 'Express', 'Immediate'
+  status            String        @default("Waiting") // 'Waiting', 'Scheduled', 'In Process', 'Completed'
+  stringerId        Int?
+  dueDate           DateTime
+  scheduledDate     DateTime?
+  createdAt         DateTime      @default(now())
+
+  racquetModel RacquetModel? @relation(fields: [modelId], references: [id])
+  stringer     Stringer?     @relation(fields: [stringerId], references: [id])
+}

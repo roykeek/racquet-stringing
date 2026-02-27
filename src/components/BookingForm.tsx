@@ -1,0 +1,300 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { format, addDays } from "date-fns";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { getModelsByManufacturerId, createServiceJob } from "@/app/actions";
+import { Manufacturer, RacquetModel } from "@prisma/client";
+
+const bookingSchema = z.object({
+    clientName: z.string().min(2, "שם מלא חייב להכיל לפחות 2 תווים"),
+    clientPhone: z.string().min(9, "מספר טלפון לא תקין"),
+    manufacturerId: z.coerce.number().min(1, "יש לבחור יצרן"),
+    modelId: z.coerce.number().optional().nullable(),
+    customRacquetInfo: z.string().optional(),
+    stringTypes: z.string().min(2, "יש להזין סוג גיד"),
+    mainsTensionLbs: z.coerce.number().min(30).max(80),
+    crossTensionLbs: z.coerce.number().min(30).max(80),
+    racquetCount: z.coerce.number().min(1).default(1),
+    urgency: z.enum(["Standard", "Express", "Immediate"]),
+    dueDate: z.string().min(1, "יש לבחור תאריך מוערך"),
+});
+
+type BookingFormValues = z.infer<typeof bookingSchema>;
+
+export default function BookingForm({
+    initialManufacturers,
+}: {
+    initialManufacturers: Manufacturer[];
+}) {
+    const [models, setModels] = useState<RacquetModel[]>([]);
+    const [isOtherManufacturer, setIsOtherManufacturer] = useState(false);
+    const [isOtherModel, setIsOtherModel] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [successTrackingId, setSuccessTrackingId] = useState<string | null>(null);
+
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm<BookingFormValues>({
+        resolver: zodResolver(bookingSchema) as any,
+        defaultValues: {
+            racquetCount: 1,
+            urgency: "Standard",
+            dueDate: format(addDays(new Date(), 3), "yyyy-MM-dd"), // Default to 3 days from now
+        },
+    });
+
+    const selectedManufacturerId = watch("manufacturerId");
+    const selectedModelId = watch("modelId");
+
+    useEffect(() => {
+        async function loadModels() {
+            if (!selectedManufacturerId) return;
+
+            const m = initialManufacturers.find((m) => m.id === Number(selectedManufacturerId));
+            if (m?.name === "Other") {
+                setIsOtherManufacturer(true);
+                setModels([]);
+            } else {
+                setIsOtherManufacturer(false);
+                const fetchedModels = await getModelsByManufacturerId(Number(selectedManufacturerId));
+                setModels(fetchedModels);
+            }
+        }
+        loadModels();
+    }, [selectedManufacturerId, initialManufacturers]);
+
+    useEffect(() => {
+        if (models.length > 0 && selectedModelId) {
+            const model = models.find((m) => m.id === Number(selectedModelId));
+            setIsOtherModel(model?.name === "Other");
+        } else {
+            setIsOtherModel(false);
+        }
+    }, [selectedModelId, models]);
+
+    const onSubmit = async (data: BookingFormValues) => {
+        setIsSubmitting(true);
+        // Convert dueDate string to Date object
+        const payload = {
+            ...data,
+            // If "Other" manufacturer is selected, modelId is null
+            modelId: isOtherManufacturer ? null : data.modelId ?? null,
+            customRacquetInfo: data.customRacquetInfo ?? null,
+            dueDate: new Date(data.dueDate),
+        };
+
+        const result = await createServiceJob(payload);
+        if (result.success && result.trackingId) {
+            setSuccessTrackingId(result.trackingId);
+        } else {
+            alert("אירעה שגיאה בביצוע ההזמנה. אנא נסה שנית.");
+        }
+        setIsSubmitting(false);
+    };
+
+    if (successTrackingId) {
+        return (
+            <div className="text-center p-8 bg-green-50 rounded-xl border border-green-200">
+                <h2 className="text-2xl font-bold text-green-700 mb-4">הזמנתך התקבלה בהצלחה!</h2>
+                <p className="text-green-900 mb-6">
+                    שמרנו את בקשתך. תוכל/י לעקוב אחר סטטוס השזירה בקישור הבא:
+                </p>
+                <div className="bg-white p-4 rounded-lg shadow-inner mb-6 flex items-center justify-center">
+                    <code className="text-sm text-gray-800 break-all select-all dir-ltr">
+                        {`/status/${successTrackingId}`}
+                    </code>
+                </div>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="text-white bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg font-medium transition"
+                >
+                    בצע הזמנה חדשה
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* 1. Client Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">שם מלא</label>
+                    <input
+                        {...register("clientName")}
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border"
+                        placeholder="ישראל ישראלי"
+                    />
+                    {errors.clientName && (
+                        <p className="mt-1 text-sm text-red-600">{errors.clientName.message}</p>
+                    )}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">טלפון (נייד)</label>
+                    <input
+                        {...register("clientPhone")}
+                        type="tel"
+                        dir="ltr"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left"
+                        placeholder="050-1234567"
+                    />
+                    {errors.clientPhone && (
+                        <p className="mt-1 text-sm text-red-600">{errors.clientPhone.message}</p>
+                    )}
+                </div>
+            </div>
+
+            <hr className="border-gray-200" />
+
+            {/* 2. Racquet Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">יצרן מחבט</label>
+                    <select
+                        {...register("manufacturerId")}
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white"
+                    >
+                        <option value="">-- בחר יצרן --</option>
+                        {initialManufacturers.map((m) => (
+                            <option key={m.id} value={m.id}>
+                                {m.name}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.manufacturerId && (
+                        <p className="mt-1 text-sm text-red-600">{errors.manufacturerId.message}</p>
+                    )}
+                </div>
+
+                {!isOtherManufacturer && (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">דגם מחבט</label>
+                        <select
+                            {...register("modelId")}
+                            disabled={models.length === 0}
+                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white disabled:bg-gray-100"
+                        >
+                            <option value="">-- בחר דגם --</option>
+                            {models.map((m) => (
+                                <option key={m.id} value={m.id}>
+                                    {m.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+            </div>
+
+            {(isOtherManufacturer || isOtherModel) && (
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        נא לפרט דגם / יצרן:
+                    </label>
+                    <input
+                        {...register("customRacquetInfo")}
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border"
+                        placeholder="למשל: סלאזינגר פרו 95"
+                    />
+                </div>
+            )}
+
+            <hr className="border-gray-200" />
+
+            {/* 3. Stringing Preferences */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">סוג גיד מבוקש</label>
+                <input
+                    {...register("stringTypes")}
+                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border"
+                    placeholder="למשל: Babolat RPM Blast או שילוב (היברידי)"
+                />
+                {errors.stringTypes && (
+                    <p className="mt-1 text-sm text-red-600">{errors.stringTypes.message}</p>
+                )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        מתיחת אורך (Mains) - Lbs
+                    </label>
+                    <input
+                        {...register("mainsTensionLbs")}
+                        type="number"
+                        dir="ltr"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left"
+                        placeholder="52"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        מתיחת לרוחב (Crosses) - Lbs
+                    </label>
+                    <input
+                        {...register("crossTensionLbs")}
+                        type="number"
+                        dir="ltr"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left"
+                        placeholder="52"
+                    />
+                </div>
+            </div>
+
+            <hr className="border-gray-200" />
+
+            {/* 4. Details */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">כמות מחבטים</label>
+                    <input
+                        {...register("racquetCount")}
+                        type="number"
+                        min="1"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">עבור שזירה שונה, צור הזמנה נפרדת.</p>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">דחיפות</label>
+                    <select
+                        {...register("urgency")}
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white"
+                    >
+                        <option value="Standard">רגיל (Standard)</option>
+                        <option value="Express">אקספרס (Express)</option>
+                        <option value="Immediate">דחוף - עכשיו! (Immediate)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">תאריך איסוף מבוקש</label>
+                    <input
+                        {...register("dueDate")}
+                        type="date"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border"
+                    />
+                </div>
+            </div>
+
+            {/* Submit */}
+            <div className="pt-4">
+                <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl disabled:bg-blue-300 transition"
+                >
+                    {isSubmitting ? "שולח..." : "שלח בקשת הזמנה"}
+                </button>
+            </div>
+        </form>
+    );
+}
