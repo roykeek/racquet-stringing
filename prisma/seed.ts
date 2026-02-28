@@ -10,7 +10,7 @@ async function main() {
     const manufacturersData = [
         {
             name: 'Wilson',
-            models: ['Pro Staff 97', 'Clash 100', 'Blade 98', 'Ultra 100'],
+            models: ['Pro Staff 97', 'Clash 100', 'Blade 98', 'Ultra 100', 'RF01', 'RF01 Pro'],
         },
         {
             name: 'Babolat',
@@ -23,6 +23,22 @@ async function main() {
         {
             name: 'Yonex',
             models: ['EZONE 98', 'VCORE 98', 'Percept 97'],
+        },
+        {
+            name: 'Dunlop',
+            models: ['CX 200', 'SX 300', 'FX 500'],
+        },
+        {
+            name: 'Tecnifibre',
+            models: ['T-Fight 305', 'TF40', 'TF-X1'],
+        },
+        {
+            name: 'Prince',
+            models: ['Phantom 97P', 'Tour 100', 'Ripstick 100'],
+        },
+        {
+            name: 'Volkl',
+            models: ['V-Cell 8', 'V-Cell 10'],
         },
         {
             name: 'Other',

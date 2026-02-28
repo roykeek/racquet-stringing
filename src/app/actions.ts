@@ -4,16 +4,28 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function getManufacturers() {
-    return prisma.manufacturer.findMany({
+    const manufacturers = await prisma.manufacturer.findMany({
         orderBy: { name: "asc" },
     });
+
+    // Sort so "Other" is always at the bottom
+    const other = manufacturers.find(m => m.name === "Other");
+    const rest = manufacturers.filter(m => m.name !== "Other");
+
+    return other ? [...rest, other] : rest;
 }
 
 export async function getModelsByManufacturerId(manufacturerId: number) {
-    return prisma.racquetModel.findMany({
+    const models = await prisma.racquetModel.findMany({
         where: { manufacturerId },
         orderBy: { name: "asc" },
     });
+
+    // Sort so "Other" is always at the bottom
+    const other = models.find(m => m.name === "Other");
+    const rest = models.filter(m => m.name !== "Other");
+
+    return other ? [...rest, other] : rest;
 }
 
 export async function createServiceJob(data: {
@@ -21,9 +33,9 @@ export async function createServiceJob(data: {
     clientPhone: string;
     modelId: number | null;
     customRacquetInfo: string | null;
-    stringTypes: string;
-    mainsTensionLbs: number;
-    crossTensionLbs: number;
+    stringTypes: string | null;
+    mainsTensionLbs: number | null;
+    crossTensionLbs: number | null;
     racquetCount: number;
     urgency: string;
     dueDate: Date;

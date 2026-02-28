@@ -40,9 +40,9 @@ model ServiceJob {
   clientPhone       String
   modelId           Int?
   customRacquetInfo String?
-  stringTypes       String        // "Mains: Poly / Cross: Syn Gut"
-  mainsTensionLbs   Decimal
-  crossTensionLbs   Decimal
+  stringTypes       String?       // "Mains: Poly / Cross: Syn Gut"
+  mainsTensionLbs   Decimal?
+  crossTensionLbs   Decimal?
   racquetCount      Int           @default(1)
   urgency           String        // 'Standard', 'Express', 'Immediate'
   status            String        @default("Waiting") // 'Waiting', 'Scheduled', 'In Process', 'Completed'

@@ -14,9 +14,9 @@ const bookingSchema = z.object({
     manufacturerId: z.coerce.number().min(1, "יש לבחור יצרן"),
     modelId: z.coerce.number().optional().nullable(),
     customRacquetInfo: z.string().optional(),
-    stringTypes: z.string().min(2, "יש להזין סוג גיד"),
-    mainsTensionLbs: z.coerce.number().min(30).max(80),
-    crossTensionLbs: z.coerce.number().min(30).max(80),
+    stringTypes: z.string().optional(),
+    mainsTensionLbs: z.string().optional(),
+    crossTensionLbs: z.string().optional(),
     racquetCount: z.coerce.number().min(1).default(1),
     urgency: z.enum(["Standard", "Express", "Immediate"]),
     dueDate: z.string().min(1, "יש לבחור תאריך מוערך"),
@@ -44,6 +44,9 @@ export default function BookingForm({
         resolver: zodResolver(bookingSchema) as any,
         defaultValues: {
             racquetCount: 1,
+            stringTypes: "",
+            mainsTensionLbs: "52",
+            crossTensionLbs: "51",
             urgency: "Standard",
             dueDate: format(addDays(new Date(), 3), "yyyy-MM-dd"), // Default to 3 days from now
         },
@@ -89,6 +92,10 @@ export default function BookingForm({
             modelId: isOtherManufacturer ? null : restData.modelId ?? null,
             customRacquetInfo: restData.customRacquetInfo ?? null,
             dueDate: new Date(restData.dueDate),
+            stringTypes: restData.stringTypes || null,
+            // Parse tension strings to numbers or null
+            mainsTensionLbs: restData.mainsTensionLbs ? Number(restData.mainsTensionLbs) : null,
+            crossTensionLbs: restData.crossTensionLbs ? Number(restData.crossTensionLbs) : null,
         };
 
         const result = await createServiceJob(payload);
@@ -231,7 +238,7 @@ export default function BookingForm({
                         {...register("mainsTensionLbs")}
                         type="number"
                         dir="ltr"
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left text-gray-900 bg-white"
+                        className={`w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left bg-white ${watch("mainsTensionLbs") === "52" ? "text-gray-400" : "text-gray-900"}`}
                         placeholder="52"
                     />
                 </div>
@@ -244,7 +251,7 @@ export default function BookingForm({
                         {...register("crossTensionLbs")}
                         type="number"
                         dir="ltr"
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left text-gray-900 bg-white"
+                        className={`w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left bg-white ${watch("crossTensionLbs") === "51" ? "text-gray-400" : "text-gray-900"}`}
                         placeholder="52"
                     />
                 </div>
