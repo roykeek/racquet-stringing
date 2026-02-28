@@ -65,7 +65,7 @@ export default function StringerLoginForm({
             )}
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">שם שזר</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">שם שוזר/ת</label>
                 <div className="relative">
                     <select
                         {...register("stringerId")}

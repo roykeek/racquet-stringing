@@ -9,7 +9,7 @@ export default async function StringerDashboard() {
     const authCookie = cookieStore.get("stringerAuth");
 
     if (!authCookie || !authCookie.value) {
-        redirect("/stringer/login");
+        redirect("/");
     }
 
     const stringerId = parseInt(authCookie.value, 10);
@@ -21,17 +21,19 @@ export default async function StringerDashboard() {
     });
 
     if (!currentUser) {
-        redirect("/stringer/login");
+        redirect("/");
     }
 
     // Fetch all jobs
     const allJobs = await getJobsForDashboard();
+    const stringers = await getStringers();
 
     return (
         <div className="min-h-screen bg-gray-100 font-sans">
             <DashboardWrapper
                 currentUser={{ id: stringerId, name: currentUser.name }}
                 allJobs={allJobs}
+                stringers={stringers}
             />
         </div>
     );

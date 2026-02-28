@@ -2,17 +2,27 @@
 
 import { useState } from "react";
 import { Wrench, LogOut, Phone, MessageCircle, Calendar } from "lucide-react";
-import { logoutStringer, updateJobStatus } from "@/app/actions";
 import { useRouter } from "next/navigation";
+import { addStringer, logoutStringer, updateJobStatus, deactivateStringer } from "@/app/actions";
 
 export default function DashboardWrapper({
     currentUser,
     allJobs,
+    stringers,
 }: {
     currentUser: { id: number; name: string };
     allJobs: any[];
+    stringers: { id: number; name: string }[];
 }) {
     const router = useRouter();
+    const [isAddingStringer, setIsAddingStringer] = useState(false);
+    const [newStringerName, setNewStringerName] = useState("");
+    const [newStringerPassword, setNewStringerPassword] = useState("");
+    const [addError, setAddError] = useState("");
+
+    const [isDeactivatingStringer, setIsDeactivatingStringer] = useState(false);
+    const [stringerToDeactivate, setStringerToDeactivate] = useState("");
+    const [deactivateError, setDeactivateError] = useState("");
 
     // Sub-filter the jobs into columns
     const waitingQueue = allJobs.filter((j) => j.status === "Waiting");
@@ -26,13 +36,45 @@ export default function DashboardWrapper({
 
     const handleLogout = async () => {
         await logoutStringer();
-        router.push("/stringer/login");
+        router.push("/");
     };
 
     const handleStatusChange = async (jobId: number, status: string, stringerId?: number) => {
         // Basic schedule assigning to current day and current user for MVP
         let date = status === "Scheduled" ? new Date() : undefined;
         await updateJobStatus(jobId, status, stringerId, date);
+    };
+
+    const handleAddStringer = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setAddError("");
+        if (!newStringerName || !newStringerPassword) return;
+        const res = await addStringer(newStringerName, newStringerPassword);
+        if (res.success) {
+            setIsAddingStringer(false);
+            setNewStringerName("");
+            setNewStringerPassword("");
+            router.refresh();
+        } else {
+            setAddError(res.error || "שגיאה בהוספה");
+        }
+    };
+
+    const handleDeactivateStringer = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setDeactivateError("");
+        if (!stringerToDeactivate) return;
+
+        if (window.confirm("האם אתה בטוח שברצונך להשבית עובד זה? פעולה זו תסתיר אותו מהמערכת.")) {
+            const res = await deactivateStringer(Number(stringerToDeactivate));
+            if (res.success) {
+                setIsDeactivatingStringer(false);
+                setStringerToDeactivate("");
+                router.refresh();
+            } else {
+                setDeactivateError(res.error || "שגיאה בהשבתה");
+            }
+        }
     };
 
     return (
@@ -48,7 +90,7 @@ export default function DashboardWrapper({
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 bg-emerald-50 px-4 py-2 rounded-full border border-emerald-100">
                         <span className="font-medium text-emerald-800">{currentUser.name}</span>
-                        <span className="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full">שזר</span>
+                        <span className="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full">שוזר/ת</span>
                     </div>
                     <button
                         onClick={handleLogout}
@@ -152,9 +194,73 @@ export default function DashboardWrapper({
                         </div>
 
                         <div className="mt-4 pt-4 border-t border-emerald-100 text-center">
-                            <button className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-3 px-4 rounded-xl transition border border-emerald-200 shadow-sm text-sm">
-                                + הוסף שזר חדש למערכת
-                            </button>
+                            {!isAddingStringer ? (
+                                <button
+                                    onClick={() => setIsAddingStringer(true)}
+                                    className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-3 px-4 rounded-xl transition border border-emerald-200 shadow-sm text-sm"
+                                >
+                                    + הוסף שוזר/ת חדש/ה למערכת
+                                </button>
+                            ) : (
+                                <form onSubmit={handleAddStringer} className="text-right space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                    <h3 className="font-semibold text-gray-800">הוספת שוזר/ת:</h3>
+                                    {addError && <p className="text-red-500 text-sm">{addError}</p>}
+                                    <input
+                                        type="text"
+                                        value={newStringerName}
+                                        onChange={(e) => setNewStringerName(e.target.value)}
+                                        placeholder="שם העובד/ת"
+                                        className="w-full border-gray-300 rounded-lg p-2 border text-sm"
+                                        required
+                                    />
+                                    <input
+                                        type="password"
+                                        value={newStringerPassword}
+                                        onChange={(e) => setNewStringerPassword(e.target.value)}
+                                        placeholder="סיסמה"
+                                        className="w-full border-gray-300 rounded-lg p-2 border text-sm"
+                                        dir="ltr"
+                                        required
+                                    />
+                                    <div className="flex gap-2">
+                                        <button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm transition">הוסף</button>
+                                        <button type="button" onClick={() => setIsAddingStringer(false)} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 rounded-lg text-sm transition">ביטול</button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
+
+                        {/* Deactivate Stringer Section */}
+                        <div className="mt-4 text-center">
+                            {!isDeactivatingStringer ? (
+                                <button
+                                    onClick={() => setIsDeactivatingStringer(true)}
+                                    className="text-xs text-gray-400 hover:text-red-500 transition underline decoration-dotted underline-offset-4"
+                                    title="השבת עובד כך שלא יוכל להתחבר יותר"
+                                >
+                                    הפוך שוזר/ת קיימ/ת ללא זמין/ה
+                                </button>
+                            ) : (
+                                <form onSubmit={handleDeactivateStringer} className="text-right space-y-3 bg-red-50 p-4 rounded-xl border border-red-200 mt-2">
+                                    <h3 className="font-semibold text-red-800 text-sm">השבתת שוזר/ת:</h3>
+                                    {deactivateError && <p className="text-red-600 text-xs font-medium">{deactivateError}</p>}
+                                    <select
+                                        value={stringerToDeactivate}
+                                        onChange={(e) => setStringerToDeactivate(e.target.value)}
+                                        className="w-full border-red-300 rounded-lg p-2 border text-sm text-gray-900 bg-white focus:ring-red-500 focus:border-red-500"
+                                        required
+                                    >
+                                        <option value="">-- בחר שוזר/ת --</option>
+                                        {stringers.filter(s => s.name !== "Tomer").map(s => (
+                                            <option key={s.id} value={s.id}>{s.name}</option>
+                                        ))}
+                                    </select>
+                                    <div className="flex gap-2">
+                                        <button type="submit" className="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 rounded-lg text-sm transition">השבת עובד/ת</button>
+                                        <button type="button" onClick={() => setIsDeactivatingStringer(false)} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 rounded-lg text-sm transition">ביטול</button>
+                                    </div>
+                                </form>
+                            )}
                         </div>
                     </div>
                 </section>

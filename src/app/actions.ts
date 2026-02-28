@@ -118,6 +118,42 @@ export async function logoutStringer() {
     cookieStore.delete("stringerAuth");
 }
 
+export async function addStringer(name: string, passwordPlain: string) {
+    try {
+        const hashedPassword = await bcrypt.hash(passwordPlain, 10);
+        await prisma.stringer.create({
+            data: {
+                name,
+                passwordHash: hashedPassword,
+            },
+        });
+        revalidatePath("/stringer");
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to add stringer:", error);
+        return { success: false, error: "Failed to add stringer (name might exist)" };
+    }
+}
+
+export async function deactivateStringer(id: number) {
+    try {
+        const stringer = await prisma.stringer.findUnique({ where: { id } });
+        if (stringer?.name === "Tomer") {
+            return { success: false, error: "לא ניתן להשבית את המשתמש הראשי Tomer" };
+        }
+
+        await prisma.stringer.update({
+            where: { id },
+            data: { isActive: false },
+        });
+        revalidatePath("/stringer");
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to deactivate stringer:", error);
+        return { success: false, error: "Failed to deactivate stringer" };
+    }
+}
+
 export async function getJobsForDashboard() {
     return prisma.serviceJob.findMany({
         include: {

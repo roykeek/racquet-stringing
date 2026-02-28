@@ -128,7 +128,7 @@ export default function BookingForm({
                     <label className="block text-sm font-medium text-gray-700 mb-1">שם מלא</label>
                     <input
                         {...register("clientName")}
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
                         placeholder="ישראל ישראלי"
                     />
                     {errors.clientName && (
@@ -142,7 +142,7 @@ export default function BookingForm({
                         {...register("clientPhone")}
                         type="tel"
                         dir="ltr"
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left text-gray-900 bg-white"
                         placeholder="050-1234567"
                     />
                     {errors.clientPhone && (
@@ -159,7 +159,7 @@ export default function BookingForm({
                     <label className="block text-sm font-medium text-gray-700 mb-1">יצרן מחבט</label>
                     <select
                         {...register("manufacturerId")}
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white text-gray-900"
                     >
                         <option value="">-- בחר יצרן --</option>
                         {initialManufacturers.map((m) => (
@@ -179,7 +179,7 @@ export default function BookingForm({
                         <select
                             {...register("modelId")}
                             disabled={models.length === 0}
-                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white disabled:bg-gray-100"
+                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
                         >
                             <option value="">-- בחר דגם --</option>
                             {models.map((m) => (
@@ -199,7 +199,7 @@ export default function BookingForm({
                     </label>
                     <input
                         {...register("customRacquetInfo")}
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
                         placeholder="למשל: סלאזינגר פרו 95"
                     />
                 </div>
@@ -212,7 +212,7 @@ export default function BookingForm({
                 <label className="block text-sm font-medium text-gray-700 mb-1">סוג גיד מבוקש</label>
                 <input
                     {...register("stringTypes")}
-                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border"
+                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
                     placeholder="למשל: Babolat RPM Blast או שילוב (היברידי)"
                 />
                 {errors.stringTypes && (
@@ -229,7 +229,7 @@ export default function BookingForm({
                         {...register("mainsTensionLbs")}
                         type="number"
                         dir="ltr"
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left text-gray-900 bg-white"
                         placeholder="52"
                     />
                 </div>
@@ -242,7 +242,7 @@ export default function BookingForm({
                         {...register("crossTensionLbs")}
                         type="number"
                         dir="ltr"
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left text-gray-900 bg-white"
                         placeholder="52"
                     />
                 </div>
@@ -258,7 +258,7 @@ export default function BookingForm({
                         {...register("racquetCount")}
                         type="number"
                         min="1"
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
                     />
                     <p className="mt-1 text-xs text-gray-500">עבור שזירה שונה, צור הזמנה נפרדת.</p>
                 </div>
@@ -267,7 +267,7 @@ export default function BookingForm({
                     <label className="block text-sm font-medium text-gray-700 mb-1">דחיפות</label>
                     <select
                         {...register("urgency")}
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white text-gray-900"
                     >
                         <option value="Standard">רגיל (Standard)</option>
                         <option value="Express">אקספרס (Express)</option>
@@ -280,7 +280,7 @@ export default function BookingForm({
                     <input
                         {...register("dueDate")}
                         type="date"
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
                     />
                 </div>
             </div>

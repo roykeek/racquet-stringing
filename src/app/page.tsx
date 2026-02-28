@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { Wrench } from "lucide-react";
+import { getStringers } from "@/app/actions";
+import StringerLoginForm from "@/components/StringerLoginForm";
 
-export default function Home() {
+export default async function Home() {
+  const stringers = await getStringers();
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gray-50">
       <main className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -35,20 +39,17 @@ export default function Home() {
         </div>
 
         {/* Stringer Card */}
-        <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center text-center space-y-6 transform transition hover:scale-105">
+        <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100 flex flex-col text-center space-y-6">
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mb-2">
             <Wrench size={32} />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">שזרים</h2>
+          <h2 className="text-3xl font-bold text-gray-900">כניסת מנהלים ושוזרים</h2>
           <p className="text-gray-500 text-lg">
             התחברו למערכת לניהול עבודות ולוח זמנים.
           </p>
-          <Link
-            href="/stringer/login"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 px-6 rounded-xl transition duration-200 shadow-md text-lg"
-          >
-            כניסת שזרים
-          </Link>
+          <div className="w-full text-right bg-gray-50 p-6 rounded-xl border border-gray-100">
+            <StringerLoginForm stringers={stringers} />
+          </div>
         </div>
       </main>
 

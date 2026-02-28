@@ -75,7 +75,7 @@
 **Layout:** Centralized split-screen or two large cards.
 
 1. **Client Button:** "הזמנת שזירה" (Book Stringing) -> Redirects to Booking Form.
-2. **Stringer Button:** "כניסת שזרים" (Stringer Login) -> Redirects to Login Portal.
+2. **Stringer Login:** "כניסת מנהלים ושוזרים" (Stringer Login Form) -> Displays the login dropdown and password field directly on the page, redirecting to the Stringer Dashboard upon success.
 
 ### B. Client Flow (Booking Form)
 
@@ -106,9 +106,11 @@
 
 #### 1. Login Logic
 
-* **Selector:** Dropdown list of existing Stringer Names (from DB).
+*Flow moved directly to the Public Landing Page.*
+
+* **Selector:** Dropdown list of existing active Stringer Names (from DB).
 * **Password:** Password input field.
-* **Action:** Verify against `PasswordHash`.
+* **Action:** Verify against `PasswordHash` and redirect to Stringer Dashboard.
 
 #### 2. Stringer Dashboard (Desktop View)
 
@@ -132,7 +134,7 @@
 * **Column 3 (Left): Work Management**
   * **In Process:** Jobs currently being worked on by *this* logged-in stringer.
   * **Completed:** History of finished jobs.
-  * **Stringer Tools:** Any logged-in stringer can add a stringer. "Add Stringer" button (Open modal: Name + Password).
+  * **Stringer Tools:** Any logged-in stringer can add or deactivate a stringer. "Add Stringer" button (Open form: Name + Password). "Deactivate Stringer" button (Open form: Select stringer + Submit).
 
 #### 3. Stringer Dashboard (Mobile View)
 
@@ -176,7 +178,15 @@
 
 ### Admin: Adding a Stringer
 
-1. Click "Add Stringer" (available to any logged-in stringer).
+1. Click "+ הוסף שוזר/ת חדש/ה למערכת" (available to any logged-in stringer).
 2. Input: New Name, New Password.
 3. **System Action:** Create new record in `stringers` table.
 4. New stringer immediately appears in Login Dropdown.
+
+### Admin: Deactivating a Stringer
+
+1. Click "הפוך שוזר/ת קיימ/ת ללא זמין/ה" (available to any logged-in stringer).
+2. Input: Select Stringer from dropdown (Excludes "Tomer").
+3. Confirm Warning Prompt.
+4. **System Action:** Update `IsActive` = false in `stringers` table for selected stringer. Note: "Tomer" cannot be deactivated on the backend.
+5. Deactivated stringer is removed from login lists and assignment selectors.
