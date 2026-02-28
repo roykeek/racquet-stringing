@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl" suppressHydrationWarning>
-      <body className={`${heebo.variable} font-sans antialiased text-gray-900 bg-gray-50 flex flex-col min-h-screen`}>
+      <body suppressHydrationWarning className={`${heebo.variable} font-sans antialiased text-gray-900 bg-gray-50 flex flex-col min-h-screen`}>
         {/* Global/Persistent Header */}
         <header className="w-full bg-white shadow-sm border-b border-gray-100 py-4 mb-2 flex flex-col items-center justify-center shrink-0">
           <div className="relative w-24 h-24 mb-2">
@@ -28,6 +28,7 @@ export default function RootLayout({
               src="/logo.jpeg"
               alt="מועדון הטניס אלוני יצחק"
               fill
+              sizes="96px"
               className="object-contain"
               priority
             />

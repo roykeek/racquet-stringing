@@ -103,7 +103,7 @@ export default function DashboardWrapper({
             </header>
 
             {/* Grid Layout */}
-            <main className="p-6 max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <main className="p-6 max-w-[1600px] mx-auto grid grid-cols-1 min-[700px]:grid-cols-2 lg:grid-cols-3 gap-8">
 
                 {/* Column 1 (Right): Waiting Queue */}
                 <section className="flex flex-col gap-4">
@@ -156,7 +156,7 @@ export default function DashboardWrapper({
                 </section>
 
                 {/* Column 3 (Left): Work Management */}
-                <section className="flex flex-col gap-6">
+                <section className="flex flex-col gap-6 min-[700px]:col-span-2 lg:col-span-1">
                     <div className="bg-white rounded-xl shadow-sm border border-emerald-200 p-4 sticky top-24">
                         <h2 className="text-xl font-bold text-emerald-800 flex items-center justify-between mb-4 border-b border-emerald-100 pb-2">
                             <span>העבודות שלי</span>
@@ -304,9 +304,13 @@ function JobCard({
             <div className="text-sm text-gray-600 mb-3 space-y-1">
                 <p><span className="font-medium text-gray-500">מחבט:</span> {job.customRacquetInfo || `${job.racquetModel?.manufacturer?.name} ${job.racquetModel?.name}`}</p>
                 <p><span className="font-medium text-gray-500">גיד:</span> {job.stringTypes}</p>
-                <p dir="ltr" className="text-right">
-                    <span className="font-medium text-gray-500 ml-1">:מתיחה</span>
-                    {job.mainsTensionLbs} / {job.crossTensionLbs} Lbs
+                <p dir="rtl" className="text-right">
+                    <span className="font-medium text-gray-500 ml-1">מתיחה:</span>
+                    {job.mainsTensionLbs !== null && job.crossTensionLbs !== null ? (
+                        <span dir="ltr" className="inline-block">{job.mainsTensionLbs} / {job.crossTensionLbs} Lbs</span>
+                    ) : (
+                        <span className="text-gray-400 italic">לא צויין</span>
+                    )}
                 </p>
                 <p><span className="font-medium text-gray-500">מספר מחבטים:</span> {job.racquetCount}</p>
                 {showAssignee && job.stringer && (
