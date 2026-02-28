@@ -1,20 +1,20 @@
 import { getManufacturers } from "@/app/actions";
 import BookingForm from "@/components/BookingForm";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 export default async function BookingPage() {
     const manufacturers = await getManufacturers();
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8 relative">
-            <div className="absolute top-6 right-6 lg:right-12">
+            <div className="absolute top-6 left-6 lg:left-12">
                 <Link
                     href="/"
-                    className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition font-medium bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200"
+                    className="flex p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition"
+                    title="יציאה"
                 >
-                    <ArrowRight size={20} />
-                    <span>יציאה</span>
+                    <LogOut size={20} />
                 </Link>
             </div>
 

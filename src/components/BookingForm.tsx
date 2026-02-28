@@ -81,12 +81,14 @@ export default function BookingForm({
     const onSubmit = async (data: BookingFormValues) => {
         setIsSubmitting(true);
         // Convert dueDate string to Date object
+        // Destructure manufacturerId out so it doesn't get sent to Prisma (which throws an Unknown Field error)
+        const { manufacturerId, ...restData } = data;
         const payload = {
-            ...data,
+            ...restData,
             // If "Other" manufacturer is selected, modelId is null
-            modelId: isOtherManufacturer ? null : data.modelId ?? null,
-            customRacquetInfo: data.customRacquetInfo ?? null,
-            dueDate: new Date(data.dueDate),
+            modelId: isOtherManufacturer ? null : restData.modelId ?? null,
+            customRacquetInfo: restData.customRacquetInfo ?? null,
+            dueDate: new Date(restData.dueDate),
         };
 
         const result = await createServiceJob(payload);
