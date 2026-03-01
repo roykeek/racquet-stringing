@@ -213,7 +213,7 @@ export default function DashboardWrapper({
                                         value={newStringerName}
                                         onChange={(e) => setNewStringerName(e.target.value)}
                                         placeholder="שם העובד/ת"
-                                        className="w-full border-gray-300 rounded-lg p-2 border text-sm"
+                                        className="w-full border-gray-300 rounded-lg p-2 border text-sm text-gray-900 bg-white"
                                         required
                                     />
                                     <input
@@ -221,7 +221,7 @@ export default function DashboardWrapper({
                                         value={newStringerPassword}
                                         onChange={(e) => setNewStringerPassword(e.target.value)}
                                         placeholder="סיסמה"
-                                        className="w-full border-gray-300 rounded-lg p-2 border text-sm"
+                                        className="w-full border-gray-300 rounded-lg p-2 border text-sm text-gray-900 bg-white"
                                         dir="ltr"
                                         required
                                     />

@@ -1,36 +1,137 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Racquet Stringing Management System 🎾
 
-## Getting Started
+A bilingual (Hebrew/English) web application for managing racquet stringing services. Built for a stringing business in Israel — clients book online, stringers manage jobs via an internal dashboard.
 
-First, run the development server:
+**Live:** Deployed on [Vercel](https://vercel.com)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Framework** | [Next.js 16](https://nextjs.org) (App Router, Server Actions) |
+| **Language** | TypeScript |
+| **Styling** | Tailwind CSS v4 |
+| **Database** | [Turso](https://turso.tech) (LibSQL — cloud-hosted SQLite) |
+| **ORM** | [Prisma](https://www.prisma.io) v5 with `driverAdapters` preview |
+| **Auth** | Cookie-based session (bcrypt password hashing) |
+| **Forms** | React Hook Form + Zod validation |
+| **Icons** | Lucide React |
+| **Hosting** | Vercel |
+
+---
+
+## Architecture
+
+```
+src/
+├── app/
+│   ├── page.tsx              # Landing page (client booking + stringer login)
+│   ├── actions.ts            # Server Actions (CRUD, auth, job status)
+│   ├── layout.tsx            # Root layout (RTL, Heebo font)
+│   ├── booking/page.tsx      # Client booking form page
+│   └── stringer/page.tsx     # Stringer dashboard (auth-protected)
+├── components/
+│   ├── BookingForm.tsx        # Client-facing booking form
+│   ├── DashboardWrapper.tsx   # Stringer dashboard (3-column layout)
+│   └── StringerLoginForm.tsx  # Stringer login form
+└── lib/
+    └── prisma.ts              # Prisma client (Turso adapter in prod, local SQLite in dev)
+
+prisma/
+├── schema.prisma              # Database schema (SQLite + driverAdapters)
+├── seed.ts                    # Local database seeding script
+└── turso-setup.mjs            # Remote Turso database setup & seeding utility
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Database Models
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Manufacturer** — Racquet brands (Wilson, Babolat, Head, etc.)
+- **RacquetModel** — Specific models linked to manufacturers
+- **Stringer** — Internal users with hashed passwords and lockout protection
+- **ServiceJob** — Core job tracking (status: Waiting → Scheduled → In Process → Completed)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Getting Started (Local Development)
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Node.js 18+
+- npm
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Setup
 
-## Deploy on Vercel
+```bash
+# Install dependencies
+npm install
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Create local SQLite database and seed data
+npx prisma db push
+npx prisma db seed
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Start dev server
+npm run dev
+```
+
+The app runs at [http://localhost:3000](http://localhost:3000) using a local SQLite file (`dev.db`).
+
+### Environment Variables
+
+Create a `.env` file in the root:
+
+```env
+DATABASE_URL="file:./dev.db"
+```
+
+---
+
+## Deployment (Vercel + Turso)
+
+### Environment Variables (Vercel Dashboard)
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | `file:./dev.db` (required at build time by Prisma) |
+| `TURSO_DATABASE_URL` | `libsql://your-db.turso.io` |
+| `TURSO_AUTH_TOKEN` | Your Turso auth token |
+
+### Initial Turso Database Setup
+
+```bash
+node prisma/turso-setup.mjs <TURSO_DATABASE_URL> <TURSO_AUTH_TOKEN>
+```
+
+This creates all tables and seeds manufacturers, models, and the initial stringer account directly on your Turso database.
+
+### How It Works
+
+- **Local dev:** Prisma connects to `dev.db` (local SQLite file)
+- **Production (Vercel):** Prisma uses the `@prisma/adapter-libsql` driver to route queries to Turso over HTTPS
+
+This dual-mode setup is handled in `src/lib/prisma.ts`.
+
+---
+
+## Key Features
+
+- 🎾 **Client Booking** — Public form with manufacturer/model dropdowns, tension inputs, urgency selection
+- 📋 **Stringer Dashboard** — 3-column layout: Waiting Queue → Shared Calendar → My Work
+- 📱 **Responsive** — Optimized for mobile, tablet, and desktop
+- 🔒 **Security** — Bcrypt password hashing, account lockout after 10 failed attempts
+- 🌐 **RTL Support** — Full Hebrew interface with proper RTL/LTR handling for numeric fields
+- 📞 **Quick Actions** — One-tap call and WhatsApp links on job cards
+
+---
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run lint` | Run ESLint |
+| `npx prisma db push` | Push schema to local SQLite |
+| `npx prisma db seed` | Seed local database |
+| `npx prisma studio` | Open Prisma visual editor |

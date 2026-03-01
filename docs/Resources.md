@@ -1,38 +1,64 @@
-# Resources Needed for Development
+# Resources & Technology Stack
 
-To successfully build the Tennis Racquet Stringing Webapp, the following resources, technologies, and assets are needed:
+## Current Production Stack
 
-## 1. Technology Stack
+### Core
 
-* **Frontend Framework:** React or Next.js (recommended for routing and server-side features) or simple HTML/CSS/JS if creating a lightweight PWA.
-* **Styling:** Vanilla CSS or Tailwind CSS for rapid prototyping and responsive layout.
-* **Backend Framework:** Node.js (Express), Python (FastAPI/Flask), or a Serverless setup (like Vercel functions).
-* **Database:** PostgreSQL or MySQL for structured relational data (`service_jobs`, `stringers`, `racquet_models`).
-* **ORM / Database Client:** Prisma, Drizzle, or raw SQL queries to interact with the database.
+| Technology | Version | Purpose |
+|---|---|---|
+| Next.js | 16.1.6 | Full-stack React framework (App Router) |
+| TypeScript | 5.x | Type-safe JavaScript |
+| React | 19.2.3 | UI library |
 
-## 2. Typography & Icons
+### Database & ORM
 
-* **Primary Font:** [Heebo](https://fonts.google.com/specimen/Heebo) (Google Fonts). Essential for clean Hebrew typography.
-* **Icons:**
-  * Phosphor Icons, Lucide, or FontAwesome for role icons (🛠️), logout icons, WhatsApp icons, and general UI signs.
+| Technology | Version | Purpose |
+|---|---|---|
+| Prisma | 5.22.0 | ORM with `driverAdapters` preview feature |
+| Turso (LibSQL) | — | Cloud-hosted SQLite database |
+| @libsql/client | 0.8.0 | LibSQL driver for Turso |
+| @prisma/adapter-libsql | 5.22.0 | Prisma ↔ Turso bridge |
 
-## 3. Libraries & Packages
+### Styling & UI
 
-* **Date Management:** `date-fns` or `dayjs` for handling scheduling and bi-weekly calendars.
-* **Form Handling & Validation:** `react-hook-form` and `zod` (if using React) to ensure inputs like Phone Numbers and Tensions are valid.
-* **UUID Generation:** `uuid` or crypto library for generating secure client order tracking links `TrackingUUID`.
-* **Password Hashing:** `bcrypt` or `argon2` for storing stringer passwords securely.
+| Technology | Version | Purpose |
+|---|---|---|
+| Tailwind CSS | 4.x | Utility-first CSS framework |
+| Lucide React | 0.575.0 | Icon library |
+| Heebo (Google Font) | — | Primary font for Hebrew typography |
 
-## 4. Seed Data Requirements
+### Forms & Validation
 
-To initialize the application, you will need:
+| Technology | Version | Purpose |
+|---|---|---|
+| React Hook Form | 7.71.2 | Performant form handling |
+| Zod | 4.3.6 | Schema validation |
+| @hookform/resolvers | 5.2.2 | Zod ↔ React Hook Form bridge |
 
-* A JSON or CSV list of common Racquet Manufacturers (Wilson, Babolat, Head, Yonex, Prince, etc.).
-* A JSON or CSV list of popular Racquet Models for those manufacturers.
-* The initial stringer account credentials (Name: Tomer, Password: to be hashed).
+### Security
 
-## 5. Hosting & Deployment
+| Technology | Version | Purpose |
+|---|---|---|
+| bcrypt | 6.0.0 | Password hashing |
+| HTTP-only cookies | — | Session management |
 
-* **Frontend Hosting:** Vercel, Netlify, or similar fast CDN-based hosting.
-* **Database Hosting:** Supabase, Neon Database, or PlanetScale for accessible Postgres/MySQL instances.
-* **Domain:** A custom domain configured with SSL/HTTPS (required for PWAs).
+### Hosting & Deployment
+
+| Service | Purpose |
+|---|---|
+| Vercel | App hosting, CI/CD (auto-deploys from GitHub `main`) |
+| Turso | Database hosting (EU-West-1 region) |
+| GitHub | Source control |
+
+## Typography & Icons
+
+- **Primary Font:** [Heebo](https://fonts.google.com/specimen/Heebo) — Clean Hebrew typography
+- **Icons:** [Lucide React](https://lucide.dev) — Wrench, LogOut, Phone, MessageCircle
+
+## Seed Data
+
+Managed via `prisma/seed.ts` (local) and `prisma/turso-setup.mjs` (remote Turso):
+
+- 9 racquet manufacturers (Wilson, Babolat, Head, Yonex, Dunlop, Tecnifibre, Prince, Volkl, Other)
+- 30+ racquet models across all manufacturers
+- Initial stringer account (Tomer)
