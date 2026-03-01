@@ -7,7 +7,7 @@ export default async function BookingPage() {
     const manufacturers = await getManufacturers();
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8 relative">
+        <div className="w-full flex flex-col items-center pt-8 pb-16 px-4 sm:px-6 lg:px-8 relative">
             <div className="absolute top-6 left-6 lg:left-12">
                 <Link
                     href="/"
