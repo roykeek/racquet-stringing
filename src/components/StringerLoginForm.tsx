@@ -6,7 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginStringer } from "@/app/actions";
 import { useRouter } from "next/navigation";
-import { Wrench } from "lucide-react";
+import { Wrench, Lock } from "lucide-react";
 
 type StringerOption = {
     id: number;
@@ -97,12 +97,17 @@ export default function StringerLoginForm({
 
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">סיסמה</label>
-                <input
-                    {...register("password")}
-                    type="password"
-                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-3 border text-left text-gray-900"
-                    dir="ltr"
-                />
+                <div className="relative">
+                    <input
+                        {...register("password")}
+                        type="password"
+                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-3 pr-10 border text-left text-gray-900"
+                        dir="ltr"
+                    />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                        <Lock size={18} />
+                    </div>
+                </div>
                 {errors.password && (
                     <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
                 )}
@@ -111,7 +116,7 @@ export default function StringerLoginForm({
             <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl disabled:bg-emerald-300 transition shadow-md"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-xl disabled:bg-emerald-300 transition shadow-md text-lg"
             >
                 {isSubmitting ? "מתחבר..." : "כניסה למערכת"}
             </button>
