@@ -12,6 +12,8 @@ const prismaClientSingleton = () => {
             authToken: process.env.TURSO_AUTH_TOKEN,
         })
         const adapter = new PrismaLibSQL(libsql)
+        // @ts-expect-error — adapter IS supported at runtime (see runtime/library.d.ts)
+        // but Prisma v5 generated types don't expose it in the public PrismaClientOptions interface
         return new PrismaClient({ adapter })
     }
 
