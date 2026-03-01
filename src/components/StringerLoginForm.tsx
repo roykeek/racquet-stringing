@@ -33,8 +33,10 @@ export default function StringerLoginForm({
         register,
         handleSubmit,
         reset,
+        setFocus,
         formState: { errors },
     } = useForm<LoginFormValues>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(loginSchema) as any,
     });
 
@@ -68,7 +70,13 @@ export default function StringerLoginForm({
                 <label className="block text-sm font-medium text-gray-700 mb-1">שם שוזר/ת</label>
                 <div className="relative">
                     <select
-                        {...register("stringerId")}
+                        {...register("stringerId", {
+                            onChange: (e) => {
+                                if (e.target.value) {
+                                    setFocus("password");
+                                }
+                            }
+                        })}
                         className="w-full border-gray-300 rounded-lg shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-3 pr-10 border bg-white appearance-none text-gray-900"
                     >
                         <option value="">-- בחר עובד --</option>

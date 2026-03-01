@@ -41,6 +41,7 @@ export default function BookingForm({
         watch,
         formState: { errors },
     } = useForm<BookingFormValues>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(bookingSchema) as any,
         defaultValues: {
             racquetCount: 1,
@@ -52,6 +53,7 @@ export default function BookingForm({
         },
     });
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const selectedManufacturerId = watch("manufacturerId");
     const selectedModelId = watch("modelId");
 
@@ -85,6 +87,7 @@ export default function BookingForm({
         setIsSubmitting(true);
         // Convert dueDate string to Date object
         // Destructure manufacturerId out so it doesn't get sent to Prisma (which throws an Unknown Field error)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { manufacturerId, ...restData } = data;
         const payload = {
             ...restData,

@@ -184,6 +184,7 @@ export async function getJobsForDashboard() {
 
 export async function updateJobStatus(jobId: number, status: string, stringerId?: number, scheduledDate?: Date) {
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data: any = { status };
         if (stringerId) data.stringerId = stringerId;
         if (scheduledDate) data.scheduledDate = scheduledDate;

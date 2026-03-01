@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Wrench, LogOut, Phone, MessageCircle, Calendar } from "lucide-react";
+import { Wrench, LogOut, Phone, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { addStringer, logoutStringer, updateJobStatus, deactivateStringer } from "@/app/actions";
 
@@ -11,6 +11,7 @@ export default function DashboardWrapper({
     stringers,
 }: {
     currentUser: { id: number; name: string };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     allJobs: any[];
     stringers: { id: number; name: string }[];
 }) {
@@ -41,7 +42,7 @@ export default function DashboardWrapper({
 
     const handleStatusChange = async (jobId: number, status: string, stringerId?: number) => {
         // Basic schedule assigning to current day and current user for MVP
-        let date = status === "Scheduled" ? new Date() : undefined;
+        const date = status === "Scheduled" ? new Date() : undefined;
         await updateJobStatus(jobId, status, stringerId, date);
     };
 
@@ -173,6 +174,8 @@ export default function DashboardWrapper({
                                         job={job}
                                         onAction={() => handleStatusChange(job.id, "Completed", currentUser.id)}
                                         actionText="סיים עבודה"
+                                        onSecondaryAction={() => handleStatusChange(job.id, "Scheduled", currentUser.id)}
+                                        secondaryActionText="החזר ליומן"
                                         highlight="green"
                                     />
                                 ))
@@ -276,12 +279,17 @@ function JobCard({
     job,
     onAction,
     actionText,
+    onSecondaryAction,
+    secondaryActionText,
     showAssignee = false,
     highlight = "gray"
 }: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     job: any,
     onAction: () => void,
     actionText: string,
+    onSecondaryAction?: () => void,
+    secondaryActionText?: string,
     showAssignee?: boolean,
     highlight?: "gray" | "yellow" | "green"
 }) {
@@ -327,6 +335,15 @@ function JobCard({
                 >
                     {actionText}
                 </button>
+
+                {onSecondaryAction && secondaryActionText && (
+                    <button
+                        onClick={onSecondaryAction}
+                        className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium py-2 rounded-lg transition"
+                    >
+                        {secondaryActionText}
+                    </button>
+                )}
 
                 <a
                     href={`tel:${job.clientPhone}`}
