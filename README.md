@@ -9,7 +9,7 @@ A bilingual (Hebrew/English) web application for managing racquet stringing serv
 ## Tech Stack
 
 | Layer | Technology |
-|---|---|
+| --- | --- |
 | **Framework** | [Next.js 16](https://nextjs.org) (App Router, Server Actions) |
 | **Language** | TypeScript |
 | **Styling** | Tailwind CSS v4 |
@@ -24,7 +24,7 @@ A bilingual (Hebrew/English) web application for managing racquet stringing serv
 
 ## Architecture
 
-```
+```text
 src/
 ├── app/
 │   ├── page.tsx              # Landing page (client booking + stringer login)
@@ -92,7 +92,7 @@ DATABASE_URL="file:./dev.db"
 ### Environment Variables (Vercel Dashboard)
 
 | Variable | Value |
-|---|---|
+| --- | --- |
 | `DATABASE_URL` | `file:./dev.db` (required at build time by Prisma) |
 | `TURSO_DATABASE_URL` | `libsql://your-db.turso.io` |
 | `TURSO_AUTH_TOKEN` | Your Turso auth token |
@@ -128,7 +128,7 @@ This dual-mode setup is handled in `src/lib/prisma.ts`.
 ## Scripts
 
 | Command | Description |
-|---|---|
+| --- | --- |
 | `npm run dev` | Start development server |
 | `npm run build` | Production build |
 | `npm run lint` | Run ESLint |
