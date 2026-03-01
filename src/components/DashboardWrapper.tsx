@@ -113,7 +113,7 @@ export default function DashboardWrapper({
                             <span>תור המתנה</span>
                             <span className="bg-blue-100 text-blue-700 text-sm py-1 px-3 rounded-full">{waitingQueue.length}</span>
                         </h2>
-                        <div className="space-y-3 overflow-y-auto max-h-[75vh] pr-2 custom-scrollbar">
+                        <div className="space-y-3 overflow-y-auto max-h-[75vh] pr-2">
                             {waitingQueue.length === 0 ? (
                                 <p className="text-center text-gray-400 py-8">אין הזמנות חדשות</p>
                             ) : (
@@ -137,7 +137,7 @@ export default function DashboardWrapper({
                             <span>יומן שזירות (משותף)</span>
                             <span className="bg-yellow-100 text-yellow-700 text-sm py-1 px-3 rounded-full">{scheduledJobs.length}</span>
                         </h2>
-                        <div className="space-y-3 overflow-y-auto max-h-[75vh] pr-2 custom-scrollbar">
+                        <div className="space-y-3 overflow-y-auto max-h-[75vh] pr-2">
                             {scheduledJobs.length === 0 ? (
                                 <p className="text-center text-gray-400 py-8">אין הזמנות משובצות</p>
                             ) : (
