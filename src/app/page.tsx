@@ -58,12 +58,13 @@ export default async function Home() {
       </main>
 
       {/* Manual reconnection test - Triggering fresh Vercel build */}
+      {/* Trigger deployment after repository visibility change */}
       <footer className="mt-16 text-gray-400 text-sm text-center space-y-1">
 
 
         <p>מערכת ניהול שזירות מחבטים &copy; {new Date().getFullYear()}</p>
         <p>הוקם ע&quot;י תומר קרני</p>
       </footer>
-    </div>
+    </div >
   );
 }
