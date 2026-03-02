@@ -59,7 +59,7 @@ export default async function Home() {
 
       <footer className="mt-16 text-gray-400 text-sm text-center space-y-1">
         <p>מערכת ניהול שזירות מחבטים &copy; {new Date().getFullYear()}</p>
-        <p>בוצע ע&quot;י תומר קרני</p>
+        <p>הוקם ע&quot;י תומר קרני</p>
       </footer>
     </div>
   );
