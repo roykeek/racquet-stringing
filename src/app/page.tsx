@@ -58,7 +58,7 @@ export default async function Home() {
       </main>
 
       {/* Manual reconnection test - Triggering fresh Vercel build */}
-      {/* Trigger deployment after repository visibility change */}
+      {/* Trigger deployment after repository visibility change (Test 2) */}
       <footer className="mt-16 text-gray-400 text-sm text-center space-y-1">
 
 
