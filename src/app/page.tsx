@@ -57,6 +57,7 @@ export default async function Home() {
         </div>
       </main>
 
+      {/* Trigger deployment after manual webhook setup (Test 3) */}
       <footer className="mt-16 text-gray-400 text-sm text-center space-y-1">
 
 
