@@ -190,7 +190,7 @@ export default function DashboardWrapper({
                                 completedJobs.slice(0, 5).map((job) => (
                                     <div key={job.id} className="p-3 bg-gray-50 border border-gray-100 rounded-lg flex justify-between items-center opacity-70">
                                         <span className="font-medium text-gray-700 text-sm">{job.clientName}</span>
-                                        <span className="text-xs text-gray-500">{new Date(job.updatedAt || job.createdAt).toLocaleDateString("he-IL")}</span>
+                                        <span className="text-xs text-gray-500">{new Date(job.createdAt).toLocaleDateString("he-IL")}</span>
                                     </div>
                                 ))
                             )}
