@@ -41,7 +41,8 @@ model ServiceJob {
   clientPhone       String
   modelId           Int?
   customRacquetInfo String?
-  stringTypes       String?       // "Mains: Poly / Cross: Syn Gut"
+  stringMain        String?       // Mains string name (e.g. "Luxilon ALU Power")
+  stringCross       String?       // Crosses string name (e.g. "Babolat VS Touch")
   mainsTensionLbs   Decimal?
   crossTensionLbs   Decimal?
   racquetCount      Int           @default(1)

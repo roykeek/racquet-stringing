@@ -55,7 +55,8 @@
 * `ClientPhone` (VARCHAR)
 * `ModelID` (INT, FK, Nullable) - Links to `racquet_models`. Null if "Other" is chosen.
 * `CustomRacquetInfo` (VARCHAR, Nullable) - Used if Manufacturer/Model is "Other".
-* `StringTypes` (TEXT) - e.g., "Mains: Poly / Cross: Syn Gut".
+* `StringMain` (TEXT, Nullable) - Mains string name, e.g., "Luxilon ALU Power".
+* `StringCross` (TEXT, Nullable) - Crosses string name, e.g., "Babolat VS Touch".
 * `MainsTension_lbs` (DECIMAL) - **Must be LBS**.
 * `CrossTension_lbs` (DECIMAL) - **Must be LBS**.
 * `RacquetCount` (INT) - Default: 1. (Assumes same string/tension setup for all racquets in this job).
@@ -87,7 +88,7 @@
 3. **Manufacturer:** Dropdown (Selects from DB). Includes "Other".
 4. **Racquet Model:** Dynamic Dropdown (Loads models based on Manufacturer selection). Includes "Other".
     * *Dynamic Logic:* If "Other" is selected in either, show a free-text input for brand/model.
-5. **String Type:** Text Input (Free text for string preferences).
+5. **String Type (Mains & Crosses):** Two autocomplete inputs powered by a static JSON list of ~30 popular strings. Custom entry allowed for unlisted strings.
 6. **Tension (Lbs):**
     * Two Number Inputs (`dir="ltr"`): **Mains** & **Crosses**.
     * *Label must explicitly say "Lbs".*

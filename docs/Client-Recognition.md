@@ -25,7 +25,8 @@ A two-phase feature that recognises returning clients and pre-fills the booking 
 | Client Phone | ✅ | Required for future Phase 2 DB lookup |
 | Manufacturer | ✅ | Rarely changes |
 | Model | ✅ | Rarely changes |
-| String Type | ✅ | Rarely changes |
+| String Main (Mains) | ✅ | Rarely changes |
+| String Cross (Crosses) | ✅ | Rarely changes |
 | Mains Tension (Lbs) | ✅ | Core value-add |
 | Crosses Tension (Lbs) | ✅ | Core value-add |
 | Urgency | ❌ | Context-dependent each visit |
@@ -40,11 +41,11 @@ A two-phase feature that recognises returning clients and pre-fills the booking 
 
 ### Schema Versioning
 
-The stored object includes a `version: 1` key. If the form field shape ever changes in the future, bump this version number in the hook — old cached data will be automatically discarded rather than causing bugs.
+The stored object includes a `version` key. If the form field shape ever changes, bump this version number — old cached data will be automatically discarded rather than causing bugs.
 
 ```ts
 // src/hooks/usePersistedState.ts
-const STORAGE_KEY = "racquet_booking_v1";
+const STORAGE_KEY = "racquet_booking_v3";  // v1→v2 added dismissedModelIds, v2→v3 split stringTypes
 ```
 
 ### Limitations
@@ -74,10 +75,10 @@ After entering a phone number, the client sees:
 - User can **edit any pre-filled value** — the chip is a starting point, not a lock
 - Clicking ✕ dismisses that racquet (stored in localStorage blocklist)
 
-### Planned API Route
+### API Route
 
 ```http
-GET /api/c/[slug]/client-history?phone=05XXXXXXXX
+GET /api/client-history?phone=05XXXXXXXX
 ```
 
 **Returns an array (equipment fields only — no PII):**
@@ -89,7 +90,8 @@ GET /api/c/[slug]/client-history?phone=05XXXXXXXX
     "modelName": "Pure Drive",
     "manufacturerName": "Babolat",
     "manufacturerId": 3,
-    "stringTypes": "RPM Blast",
+    "stringMain": "Babolat RPM Blast",
+    "stringCross": "Babolat VS Touch",
     "mainsTensionLbs": 52,
     "crossTensionLbs": 50,
     "lastUsed": "2026-01-15T10:30:00Z"
@@ -101,13 +103,16 @@ GET /api/c/[slug]/client-history?phone=05XXXXXXXX
 
 Groups by `modelId` to prevent clutter (Pure Drive 52lbs, Pure Drive 53lbs, etc.). Shows the **latest** tension/string for each unique model within the last 18 months.
 
+The actual implementation uses Prisma queries with JS-side de-duplication (Prisma doesn't natively support `GROUP BY` with aggregates on related fields). Conceptual SQL equivalent:
+
 ```sql
 SELECT
   sj.modelId,
   rm.name AS modelName,
   m.name AS manufacturerName,
   m.id AS manufacturerId,
-  sj.stringTypes,
+  sj.stringMain,
+  sj.stringCross,
   sj.mainsTensionLbs,
   sj.crossTensionLbs,
   MAX(sj.createdAt) AS lastUsed
@@ -130,10 +135,10 @@ LIMIT 3;
 Dismissed racquets are stored as a **localStorage blocklist** — no schema change needed.
 
 ```ts
-// In usePersistedState.ts — bump version to 2
+// In usePersistedState.ts — currently at version 3
 interface PersistedBookingData {
-  version: 2;
-  // ... existing fields
+  version: 3;
+  // ... existing fields (stringMain, stringCross instead of stringTypes)
   dismissedModelIds: string[];  // e.g. ["12", "5"]
 }
 ```
@@ -159,7 +164,7 @@ Chips appear **between the contact info section and the racquet section** — co
 │  [ Pure Aero  · 50/48 ]  ✕  │
 ├─────────────────────────────┤
 │  יצרן מחבט      דגם מחבט    │  ← Racquet section (pre-filled when chip is clicked)
-│  סוג גיד       מתיחה        │
+│  גיד אורך   גיד רוחב  מתיחה│
 └─────────────────────────────┘
 ```
 

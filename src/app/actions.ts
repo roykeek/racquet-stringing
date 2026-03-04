@@ -33,7 +33,8 @@ export async function createServiceJob(data: {
     clientPhone: string;
     modelId: number | null;
     customRacquetInfo: string | null;
-    stringTypes: string | null;
+    stringMain: string | null;
+    stringCross: string | null;
     mainsTensionLbs: number | null;
     crossTensionLbs: number | null;
     racquetCount: number;

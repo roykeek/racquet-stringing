@@ -6,19 +6,20 @@
  *
  * Schema version is embedded so stale data from old field shapes is discarded.
  *
- * v2: Added dismissedModelIds for Phase 2 Smart History chip dismissals.
+ * v3: Split stringTypes → stringMain + stringCross for hybrid string support.
  */
 
-const STORAGE_KEY = "racquet_booking_v2";
+const STORAGE_KEY = "racquet_booking_v3";
 
 export interface PersistedBookingData {
     /** Schema version — bump when field shape changes to auto-clear stale data */
-    version: 2;
+    version: 3;
     clientName: string;
     clientPhone: string;
     manufacturerId: string;
     modelId: string;
-    stringTypes: string;
+    stringMain: string;
+    stringCross: string;
     mainsTensionLbs: string;
     crossTensionLbs: string;
     /** Model IDs the client has dismissed from the Smart History chips */
@@ -38,7 +39,7 @@ export function loadPersistedData(): PersistedBookingData | null {
         if (!raw) return null;
 
         const parsed = JSON.parse(raw) as Partial<PersistedBookingData>;
-        if (parsed.version !== 2) return null; // stale schema — discard
+        if (parsed.version !== 3) return null; // stale schema — discard
 
         return parsed as PersistedBookingData;
     } catch {
@@ -60,7 +61,7 @@ export function savePersistedData(
         // Preserve any existing dismissedModelIds when saving form data
         const existing = loadPersistedData();
         const payload: PersistedBookingData = {
-            version: 2,
+            version: 3,
             ...data,
             dismissedModelIds: existing?.dismissedModelIds ?? [],
         };
@@ -95,12 +96,13 @@ export function addDismissedModelId(modelId: string): void {
         const updated: PersistedBookingData = existing
             ? { ...existing, dismissedModelIds: [...dismissed, modelId] }
             : {
-                version: 2,
+                version: 3,
                 clientName: "",
                 clientPhone: "",
                 manufacturerId: "",
                 modelId: "",
-                stringTypes: "",
+                stringMain: "",
+                stringCross: "",
                 mainsTensionLbs: "",
                 crossTensionLbs: "",
                 dismissedModelIds: [modelId],

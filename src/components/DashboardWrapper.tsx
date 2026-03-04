@@ -311,7 +311,7 @@ function JobCard({
 
             <div className="text-sm text-gray-600 mb-3 space-y-1">
                 <p><span className="font-medium text-gray-500">מחבט:</span> {job.customRacquetInfo || `${job.racquetModel?.manufacturer?.name} ${job.racquetModel?.name}`}</p>
-                <p><span className="font-medium text-gray-500">גיד:</span> {job.stringTypes}</p>
+                <p><span className="font-medium text-gray-500">גיד:</span> {job.stringMain && job.stringCross ? `${job.stringMain} / ${job.stringCross}` : job.stringMain || job.stringCross || <span className="text-gray-400 italic">לא צויין</span>}</p>
                 <p dir="rtl" className="text-right">
                     <span className="font-medium text-gray-500 ml-1">מתיחה:</span>
                     {job.mainsTensionLbs !== null && job.crossTensionLbs !== null ? (

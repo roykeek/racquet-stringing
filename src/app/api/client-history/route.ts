@@ -87,7 +87,8 @@ async function queryClientHistory(phone: string, months: number | null) {
         modelName: string;
         manufacturerId: number;
         manufacturerName: string;
-        stringTypes: string | null;
+        stringMain: string | null;
+        stringCross: string | null;
         mainsTensionLbs: number | null;
         crossTensionLbs: number | null;
         lastUsed: Date;
@@ -104,7 +105,8 @@ async function queryClientHistory(phone: string, months: number | null) {
             modelName: job.racquetModel.name,
             manufacturerId: job.racquetModel.manufacturer.id,
             manufacturerName: job.racquetModel.manufacturer.name,
-            stringTypes: job.stringTypes,
+            stringMain: job.stringMain,
+            stringCross: job.stringCross,
             mainsTensionLbs: job.mainsTensionLbs ? Number(job.mainsTensionLbs) : null,
             crossTensionLbs: job.crossTensionLbs ? Number(job.crossTensionLbs) : null,
             lastUsed: job.createdAt,

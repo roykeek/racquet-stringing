@@ -7,13 +7,22 @@ This document serves as a living repository for ideas, features, and improvement
 - [ ] Set up an end-to-end automated testing framework (e.g., Playwright or Cypress).
 - [ ] Add unit and component tests (e.g., Jest + React Testing Library) to ensure reliability.
 
-## 🚀 New Features & Enhancements
+## 🚀 Phase 2 — Client Recognition & String Standardisation
 
-- [/] **Client Recognition — Phase 2 (Phone Lookup):** After the client types their phone number, query the DB for their last completed order and pre-fill equipment fields (Racquet, String, Tension). See `docs/Client-Recognition.md` for full spec and security requirements.
+- [/] **Phone Lookup (Smart History):** After the client types their phone number, query the DB for their last 3 unique racquet setups and show as clickable chips. See `docs/Client-Recognition.md` for full spec.
+- [x] **Split `stringTypes` → `stringMain` + `stringCross`:** Schema change to support hybrid setups and enable accurate material tracking. Existing test data can be deleted (no migration needed).
+- [x] **Smart Autocomplete for strings:** Static JSON list of ~30 popular strings with fuzzy search on the booking form. Custom entry allowed for unlisted strings.
+- [ ] **Rate limiting:** Required before shipping Phase 2 phone lookup to production. Prevent enumeration attacks on `/api/client-history`. Recommended: Upstash Redis + `@upstash/ratelimit`.
+
+## 📊 Phase 3 — Stringer Dashboard: Material Usage & Reporting
+
+- [ ] **Material Usage Report:** Query `stringMain`/`stringCross` across completed jobs to show how many times each string was used in a given period. Filterable by date range and string name.
+- [ ] **Restock Alerts:** Surface insights like "You used RPM Blast in 15 jobs last month — time to restock?"
+- [ ] **Excel Export:** Export job data and material usage reports to `.xlsx` using SheetJS (`xlsx` package). Client-side generation, no server dependency.
 
 ## 🛠️ Technical Debt & Refactoring
 
-- [ ] **Rate limiting:** Required before shipping Phase 2 phone lookup. Prevent enumeration attacks on `/api/c/[slug]/client-history`. Recommended: Upstash Redis + `@upstash/ratelimit`.
+*(No items yet)*
 
 ## 🎨 UI / UX Improvements
 

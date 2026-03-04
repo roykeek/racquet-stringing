@@ -19,7 +19,7 @@ This guide explains how both Clients and Stringers will interact with the Tennis
   * A second dropdown automatically populates with models for that brand. They select their Model (e.g., Pure Aero).
   * *Note:* If their brand/model isn't listed, they select "Other" and manually type it in.
 * **String Preferences:**
-  * They type in their preferred string (e.g., RPM Blast).
+  * They select their preferred strings for the Mains and Crosses using an autocomplete search (e.g., start typing "RPM" to see "Babolat RPM Blast"). Custom strings can also be typed manually.
   * They specify the tension in **Lbs** for both the Mains and the Crosses.
 * **Details:**
   * They specify the quantity of racquets needing this exact setup.

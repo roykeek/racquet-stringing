@@ -9,6 +9,7 @@ import { getModelsByManufacturerId, createServiceJob } from "@/app/actions";
 import { Manufacturer, RacquetModel } from "@prisma/client";
 import { loadPersistedData, savePersistedData } from "@/hooks/usePersistedState";
 import RacquetHistoryChips, { RacquetChip } from "@/components/RacquetHistoryChips";
+import StringAutocomplete from "@/components/StringAutocomplete";
 
 const bookingSchema = z.object({
     clientName: z.string().min(2, "שם מלא חייב להכיל לפחות 2 תווים"),
@@ -17,7 +18,8 @@ const bookingSchema = z.object({
     manufacturerId: z.coerce.number().min(1, "יש לבחור יצרן"),
     modelId: z.coerce.number().optional().nullable(),
     customRacquetInfo: z.string().optional(),
-    stringTypes: z.string().optional(),
+    stringMain: z.string().optional(),
+    stringCross: z.string().optional(),
     mainsTensionLbs: z.string().optional(),
     crossTensionLbs: z.string().optional(),
     racquetCount: z.coerce.number().min(1).default(1),
@@ -51,7 +53,8 @@ export default function BookingForm({
         resolver: zodResolver(bookingSchema) as any,
         defaultValues: {
             racquetCount: 1,
-            stringTypes: "",
+            stringMain: "",
+            stringCross: "",
             mainsTensionLbs: "52",
             crossTensionLbs: "51",
             urgency: "Standard",
@@ -79,7 +82,8 @@ export default function BookingForm({
             manufacturerId: (saved.manufacturerId || undefined) as any,
             // modelId is NOT set here — the models dropdown is still empty at this point.
             // It will be applied by the models-loaded effect below via pendingModelIdRef.
-            stringTypes: saved.stringTypes,
+            stringMain: saved.stringMain,
+            stringCross: saved.stringCross,
             mainsTensionLbs: saved.mainsTensionLbs,
             crossTensionLbs: saved.crossTensionLbs,
             // Non-persisted fields keep their defaults
@@ -146,8 +150,9 @@ export default function BookingForm({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setValue("manufacturerId", chip.manufacturerId as any);
 
-        // Set string type and tensions immediately
-        setValue("stringTypes", chip.stringTypes ?? "");
+        // Set string types and tensions immediately
+        setValue("stringMain", chip.stringMain ?? "");
+        setValue("stringCross", chip.stringCross ?? "");
         setValue("mainsTensionLbs", chip.mainsTensionLbs != null ? String(chip.mainsTensionLbs) : "");
         setValue("crossTensionLbs", chip.crossTensionLbs != null ? String(chip.crossTensionLbs) : "");
     };
@@ -164,7 +169,8 @@ export default function BookingForm({
             modelId: isOtherManufacturer ? null : restData.modelId ?? null,
             customRacquetInfo: restData.customRacquetInfo ?? null,
             dueDate: new Date(restData.dueDate),
-            stringTypes: restData.stringTypes || null,
+            stringMain: restData.stringMain || null,
+            stringCross: restData.stringCross || null,
             // Parse tension strings to numbers or null
             mainsTensionLbs: restData.mainsTensionLbs ? Number(restData.mainsTensionLbs) : null,
             crossTensionLbs: restData.crossTensionLbs ? Number(restData.crossTensionLbs) : null,
@@ -178,7 +184,8 @@ export default function BookingForm({
                 clientPhone: data.clientPhone,
                 manufacturerId: String(data.manufacturerId ?? ""),
                 modelId: String(data.modelId ?? ""),
-                stringTypes: data.stringTypes ?? "",
+                stringMain: data.stringMain ?? "",
+                stringCross: data.stringCross ?? "",
                 mainsTensionLbs: data.mainsTensionLbs ?? "",
                 crossTensionLbs: data.crossTensionLbs ?? "",
             });
@@ -320,16 +327,21 @@ export default function BookingForm({
                 <hr className="border-gray-200" />
 
                 {/* 3. Stringing Preferences */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">סוג גיד מבוקש</label>
-                    <input
-                        {...register("stringTypes")}
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
-                        placeholder="למשל: Babolat RPM Blast או שילוב (היברידי)"
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <StringAutocomplete
+                        label="גיד אורך (Mains)"
+                        placeholder="לדוגמה: Luxilon ALU Power"
+                        value={watch("stringMain") ?? ""}
+                        onChange={(val) => setValue("stringMain", val)}
+                        error={errors.stringMain?.message}
                     />
-                    {errors.stringTypes && (
-                        <p className="mt-1 text-sm text-red-600">{errors.stringTypes.message}</p>
-                    )}
+                    <StringAutocomplete
+                        label="גיד רוחב (Crosses)"
+                        placeholder="לדוגמה: Babolat VS Touch"
+                        value={watch("stringCross") ?? ""}
+                        onChange={(val) => setValue("stringCross", val)}
+                        error={errors.stringCross?.message}
+                    />
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">

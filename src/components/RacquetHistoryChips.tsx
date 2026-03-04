@@ -8,7 +8,8 @@ export interface RacquetChip {
     modelName: string;
     manufacturerId: number;
     manufacturerName: string;
-    stringTypes: string | null;
+    stringMain: string | null;
+    stringCross: string | null;
     mainsTensionLbs: number | null;
     crossTensionLbs: number | null;
     lastUsed: string;
@@ -112,8 +113,13 @@ export default function RacquetHistoryChips({ phone, onChipClick }: RacquetHisto
                         >
                             <span className="flex-1 truncate">
                                 <span className="font-semibold">{chip.manufacturerName} {chip.modelName}</span>
-                                {chip.stringTypes && (
-                                    <span className="text-gray-500"> · {chip.stringTypes}</span>
+                                {(chip.stringMain || chip.stringCross) && (
+                                    <span className="text-gray-500">
+                                        {" · "}
+                                        {chip.stringMain && chip.stringCross
+                                            ? `${chip.stringMain} / ${chip.stringCross}`
+                                            : chip.stringMain || chip.stringCross}
+                                    </span>
                                 )}
                                 {chip.mainsTensionLbs != null && chip.crossTensionLbs != null && (
                                     <span className="text-gray-500">
