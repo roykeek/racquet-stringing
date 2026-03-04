@@ -11,7 +11,8 @@ import { loadPersistedData, savePersistedData } from "@/hooks/usePersistedState"
 
 const bookingSchema = z.object({
     clientName: z.string().min(2, "שם מלא חייב להכיל לפחות 2 תווים"),
-    clientPhone: z.string().min(9, "מספר טלפון לא תקין"),
+    clientPhone: z.string()
+        .regex(/^05\d{8}$/, "מספר טלפון לא תקין — יש להזין 10 ספרות (לדוגמה: 0501234567)"),
     manufacturerId: z.coerce.number().min(1, "יש לבחור יצרן"),
     modelId: z.coerce.number().optional().nullable(),
     customRacquetInfo: z.string().optional(),
@@ -64,8 +65,12 @@ export default function BookingForm({
         reset({
             clientName: saved.clientName,
             clientPhone: saved.clientPhone,
-            manufacturerId: saved.manufacturerId ? Number(saved.manufacturerId) : undefined,
-            modelId: saved.modelId ? Number(saved.modelId) : undefined,
+            // Select elements with register() use string values — pass strings, not numbers.
+            // z.coerce.number() handles string→number on validation, so raw form values are strings.
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            manufacturerId: (saved.manufacturerId || undefined) as any,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            modelId: (saved.modelId || undefined) as any,
             stringTypes: saved.stringTypes,
             mainsTensionLbs: saved.mainsTensionLbs,
             crossTensionLbs: saved.crossTensionLbs,
@@ -202,8 +207,10 @@ export default function BookingForm({
                             {...register("clientPhone")}
                             type="tel"
                             dir="ltr"
+                            maxLength={10}
+                            pattern="05\d{8}"
                             className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left text-gray-900 bg-white"
-                            placeholder="050-1234567"
+                            placeholder="0501234567"
                         />
                         {errors.clientPhone && (
                             <p className="mt-1 text-sm text-red-600">{errors.clientPhone.message}</p>
