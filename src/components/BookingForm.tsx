@@ -106,22 +106,26 @@ export default function BookingForm({
                 setIsOtherManufacturer(false);
                 const fetchedModels = await getModelsByManufacturerId(Number(selectedManufacturerId));
                 setModels(fetchedModels);
-
-                // Apply deferred modelId from localStorage now that models are available
-                if (pendingModelIdRef.current) {
-                    const matchExists = fetchedModels.some(
-                        (mdl) => String(mdl.id) === pendingModelIdRef.current
-                    );
-                    if (matchExists) {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        setValue("modelId", pendingModelIdRef.current as any);
-                    }
-                    pendingModelIdRef.current = null; // only apply once
-                }
             }
         }
         loadModels();
-    }, [selectedManufacturerId, initialManufacturers, setValue]);
+    }, [selectedManufacturerId, initialManufacturers]);
+
+    // Apply deferred modelId AFTER React re-renders the <select> with new <option> elements.
+    // This must be a separate useEffect from the models-fetch — setValue only works
+    // after the DOM has the matching <option>, which happens on the next render cycle.
+    useEffect(() => {
+        if (models.length > 0 && pendingModelIdRef.current) {
+            const matchExists = models.some(
+                (mdl) => String(mdl.id) === pendingModelIdRef.current
+            );
+            if (matchExists) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                setValue("modelId", pendingModelIdRef.current as any);
+            }
+            pendingModelIdRef.current = null;
+        }
+    }, [models, setValue]);
 
     useEffect(() => {
         if (models.length > 0 && selectedModelId) {
