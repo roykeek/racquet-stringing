@@ -9,7 +9,7 @@ This document serves as a living repository for ideas, features, and improvement
 
 ## 🚀 New Features & Enhancements
 
-- [ ] **Client Recognition — Phase 2 (Phone Lookup):** After the client types their phone number, query the DB for their last completed order and pre-fill equipment fields (Racquet, String, Tension). See `docs/Client-Recognition.md` for full spec and security requirements.
+- [/] **Client Recognition — Phase 2 (Phone Lookup):** After the client types their phone number, query the DB for their last completed order and pre-fill equipment fields (Racquet, String, Tension). See `docs/Client-Recognition.md` for full spec and security requirements.
 
 ## 🛠️ Technical Debt & Refactoring
 

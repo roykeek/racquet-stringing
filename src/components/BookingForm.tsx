@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { getModelsByManufacturerId, createServiceJob } from "@/app/actions";
 import { Manufacturer, RacquetModel } from "@prisma/client";
 import { loadPersistedData, savePersistedData } from "@/hooks/usePersistedState";
+import RacquetHistoryChips, { RacquetChip } from "@/components/RacquetHistoryChips";
 
 const bookingSchema = z.object({
     clientName: z.string().min(2, "שם מלא חייב להכיל לפחות 2 תווים"),
@@ -136,6 +137,21 @@ export default function BookingForm({
         }
     }, [selectedModelId, models]);
 
+    // Phase 2: Handle chip click — pre-fill racquet fields and trigger model loading
+    const handleChipClick = (chip: RacquetChip) => {
+        // Store the modelId for deferred application (models haven't loaded for this manufacturer yet)
+        pendingModelIdRef.current = String(chip.modelId);
+
+        // Set manufacturer — this triggers the existing useEffect to fetch models
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setValue("manufacturerId", chip.manufacturerId as any);
+
+        // Set string type and tensions immediately
+        setValue("stringTypes", chip.stringTypes ?? "");
+        setValue("mainsTensionLbs", chip.mainsTensionLbs != null ? String(chip.mainsTensionLbs) : "");
+        setValue("crossTensionLbs", chip.crossTensionLbs != null ? String(chip.crossTensionLbs) : "");
+    };
+
     const onSubmit = async (data: BookingFormValues) => {
         setIsSubmitting(true);
         // Convert dueDate string to Date object
@@ -240,6 +256,12 @@ export default function BookingForm({
                         )}
                     </div>
                 </div>
+
+                {/* Phase 2: Smart History chips — between contact info and racquet section */}
+                <RacquetHistoryChips
+                    phone={watch("clientPhone") ?? ""}
+                    onChipClick={handleChipClick}
+                />
 
                 <hr className="border-gray-200" />
 

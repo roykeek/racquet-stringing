@@ -5,13 +5,15 @@
  * (on the same device/browser) get a pre-filled form experience.
  *
  * Schema version is embedded so stale data from old field shapes is discarded.
+ *
+ * v2: Added dismissedModelIds for Phase 2 Smart History chip dismissals.
  */
 
-const STORAGE_KEY = "racquet_booking_v1";
+const STORAGE_KEY = "racquet_booking_v2";
 
 export interface PersistedBookingData {
     /** Schema version — bump when field shape changes to auto-clear stale data */
-    version: 1;
+    version: 2;
     clientName: string;
     clientPhone: string;
     manufacturerId: string;
@@ -19,6 +21,8 @@ export interface PersistedBookingData {
     stringTypes: string;
     mainsTensionLbs: string;
     crossTensionLbs: string;
+    /** Model IDs the client has dismissed from the Smart History chips */
+    dismissedModelIds: string[];
 }
 
 /**
@@ -34,7 +38,7 @@ export function loadPersistedData(): PersistedBookingData | null {
         if (!raw) return null;
 
         const parsed = JSON.parse(raw) as Partial<PersistedBookingData>;
-        if (parsed.version !== 1) return null; // stale schema — discard
+        if (parsed.version !== 2) return null; // stale schema — discard
 
         return parsed as PersistedBookingData;
     } catch {
@@ -48,16 +52,63 @@ export function loadPersistedData(): PersistedBookingData | null {
  * Intentionally excludes: urgency, dueDate, racquetCount.
  */
 export function savePersistedData(
-    data: Omit<PersistedBookingData, "version">
+    data: Omit<PersistedBookingData, "version" | "dismissedModelIds">
 ): void {
     if (typeof window === "undefined") return;
 
     try {
-        const payload: PersistedBookingData = { version: 1, ...data };
+        // Preserve any existing dismissedModelIds when saving form data
+        const existing = loadPersistedData();
+        const payload: PersistedBookingData = {
+            version: 2,
+            ...data,
+            dismissedModelIds: existing?.dismissedModelIds ?? [],
+        };
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch {
         // localStorage might be blocked (e.g. private browsing with strict settings)
         // Fail silently — this is an enhancement, not core functionality.
+    }
+}
+
+/**
+ * Returns the list of dismissed model IDs from localStorage.
+ */
+export function getDismissedModelIds(): string[] {
+    const data = loadPersistedData();
+    return data?.dismissedModelIds ?? [];
+}
+
+/**
+ * Adds a model ID to the dismissed list in localStorage.
+ * Prevents duplicate entries.
+ */
+export function addDismissedModelId(modelId: string): void {
+    if (typeof window === "undefined") return;
+
+    try {
+        const existing = loadPersistedData();
+        const dismissed = existing?.dismissedModelIds ?? [];
+
+        if (dismissed.includes(modelId)) return; // already dismissed
+
+        const updated: PersistedBookingData = existing
+            ? { ...existing, dismissedModelIds: [...dismissed, modelId] }
+            : {
+                version: 2,
+                clientName: "",
+                clientPhone: "",
+                manufacturerId: "",
+                modelId: "",
+                stringTypes: "",
+                mainsTensionLbs: "",
+                crossTensionLbs: "",
+                dismissedModelIds: [modelId],
+            };
+
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+        // Fail silently
     }
 }
 

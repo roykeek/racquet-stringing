@@ -56,7 +56,7 @@ const STORAGE_KEY = "racquet_booking_v1";
 
 ## Phase 2 — Smart History: Multi-Racquet Phone Lookup (Planned)
 
-**Branch:** `feature/client-phone-lookup` *(not started)*
+**Branch:** `feature/client-phone-lookup` *(in progress — 05/03/2026)*
 
 **Concept:** When the client enters their phone number, the system queries `ServiceJob` for their **last 3 unique racquet models** (grouped by `modelId`, showing the most recent tension/string for each). These appear as clickable "Quick Select" chips between the contact info and racquet sections of the form.
 
