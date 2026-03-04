@@ -9,11 +9,11 @@ This document serves as a living repository for ideas, features, and improvement
 
 ## 🚀 New Features & Enhancements
 
-*(No items yet)*
+- [ ] **Client Recognition — Phase 2 (Phone Lookup):** After the client types their phone number, query the DB for their last completed order and pre-fill equipment fields (Racquet, String, Tension). See `docs/Client-Recognition.md` for full spec and security requirements.
 
 ## 🛠️ Technical Debt & Refactoring
 
-*(No items yet)*
+- [ ] **Rate limiting:** Required before shipping Phase 2 phone lookup. Prevent enumeration attacks on `/api/c/[slug]/client-history`. Recommended: Upstash Redis + `@upstash/ratelimit`.
 
 ## 🎨 UI / UX Improvements
 
