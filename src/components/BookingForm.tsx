@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { format, addDays } from "date-fns";
 import { z } from "zod";
@@ -43,6 +43,7 @@ export default function BookingForm({
         handleSubmit,
         watch,
         reset,
+        setValue,
         formState: { errors },
     } = useForm<BookingFormValues>({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,10 +58,16 @@ export default function BookingForm({
         },
     });
 
+    // Ref to hold a modelId that should be applied after models are fetched
+    const pendingModelIdRef = useRef<string | null>(null);
+
     // Load persisted client data on first mount and pre-fill the form
     useEffect(() => {
         const saved = loadPersistedData();
         if (!saved) return;
+
+        // Store modelId for deferred application — models haven't loaded yet
+        if (saved.modelId) pendingModelIdRef.current = saved.modelId;
 
         reset({
             clientName: saved.clientName,
@@ -69,8 +76,8 @@ export default function BookingForm({
             // z.coerce.number() handles string→number on validation, so raw form values are strings.
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             manufacturerId: (saved.manufacturerId || undefined) as any,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            modelId: (saved.modelId || undefined) as any,
+            // modelId is NOT set here — the models dropdown is still empty at this point.
+            // It will be applied by the models-loaded effect below via pendingModelIdRef.
             stringTypes: saved.stringTypes,
             mainsTensionLbs: saved.mainsTensionLbs,
             crossTensionLbs: saved.crossTensionLbs,
@@ -99,10 +106,22 @@ export default function BookingForm({
                 setIsOtherManufacturer(false);
                 const fetchedModels = await getModelsByManufacturerId(Number(selectedManufacturerId));
                 setModels(fetchedModels);
+
+                // Apply deferred modelId from localStorage now that models are available
+                if (pendingModelIdRef.current) {
+                    const matchExists = fetchedModels.some(
+                        (mdl) => String(mdl.id) === pendingModelIdRef.current
+                    );
+                    if (matchExists) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        setValue("modelId", pendingModelIdRef.current as any);
+                    }
+                    pendingModelIdRef.current = null; // only apply once
+                }
             }
         }
         loadModels();
-    }, [selectedManufacturerId, initialManufacturers]);
+    }, [selectedManufacturerId, initialManufacturers, setValue]);
 
     useEffect(() => {
         if (models.length > 0 && selectedModelId) {
