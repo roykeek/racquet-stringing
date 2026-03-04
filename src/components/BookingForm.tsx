@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { format, addDays } from "date-fns";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getModelsByManufacturerId, createServiceJob } from "@/app/actions";
 import { Manufacturer, RacquetModel } from "@prisma/client";
+import { loadPersistedData, savePersistedData } from "@/hooks/usePersistedState";
 
 const bookingSchema = z.object({
     clientName: z.string().min(2, "שם מלא חייב להכיל לפחות 2 תווים"),
-    clientPhone: z.string().min(9, "מספר טלפון לא תקין"),
+    clientPhone: z.string()
+        .regex(/^05\d{8}$/, "מספר טלפון לא תקין — יש להזין 10 ספרות (לדוגמה: 0501234567)"),
     manufacturerId: z.coerce.number().min(1, "יש לבחור יצרן"),
     modelId: z.coerce.number().optional().nullable(),
     customRacquetInfo: z.string().optional(),
@@ -34,11 +36,14 @@ export default function BookingForm({
     const [isOtherModel, setIsOtherModel] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [successTrackingId, setSuccessTrackingId] = useState<string | null>(null);
+    const [isPreFilled, setIsPreFilled] = useState(false);
 
     const {
         register,
         handleSubmit,
         watch,
+        reset,
+        setValue,
         formState: { errors },
     } = useForm<BookingFormValues>({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,6 +57,38 @@ export default function BookingForm({
             dueDate: format(addDays(new Date(), 3), "yyyy-MM-dd"), // Default to 3 days from now
         },
     });
+
+    // Ref to hold a modelId that should be applied after models are fetched
+    const pendingModelIdRef = useRef<string | null>(null);
+
+    // Load persisted client data on first mount and pre-fill the form
+    useEffect(() => {
+        const saved = loadPersistedData();
+        if (!saved) return;
+
+        // Store modelId for deferred application — models haven't loaded yet
+        if (saved.modelId) pendingModelIdRef.current = saved.modelId;
+
+        reset({
+            clientName: saved.clientName,
+            clientPhone: saved.clientPhone,
+            // Select elements with register() use string values — pass strings, not numbers.
+            // z.coerce.number() handles string→number on validation, so raw form values are strings.
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            manufacturerId: (saved.manufacturerId || undefined) as any,
+            // modelId is NOT set here — the models dropdown is still empty at this point.
+            // It will be applied by the models-loaded effect below via pendingModelIdRef.
+            stringTypes: saved.stringTypes,
+            mainsTensionLbs: saved.mainsTensionLbs,
+            crossTensionLbs: saved.crossTensionLbs,
+            // Non-persisted fields keep their defaults
+            racquetCount: 1,
+            urgency: "Standard",
+            dueDate: format(addDays(new Date(), 3), "yyyy-MM-dd"),
+        });
+        setIsPreFilled(true);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // eslint-disable-next-line react-hooks/incompatible-library
     const selectedManufacturerId = watch("manufacturerId");
@@ -73,6 +110,22 @@ export default function BookingForm({
         }
         loadModels();
     }, [selectedManufacturerId, initialManufacturers]);
+
+    // Apply deferred modelId AFTER React re-renders the <select> with new <option> elements.
+    // This must be a separate useEffect from the models-fetch — setValue only works
+    // after the DOM has the matching <option>, which happens on the next render cycle.
+    useEffect(() => {
+        if (models.length > 0 && pendingModelIdRef.current) {
+            const matchExists = models.some(
+                (mdl) => String(mdl.id) === pendingModelIdRef.current
+            );
+            if (matchExists) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                setValue("modelId", pendingModelIdRef.current as any);
+            }
+            pendingModelIdRef.current = null;
+        }
+    }, [models, setValue]);
 
     useEffect(() => {
         if (models.length > 0 && selectedModelId) {
@@ -103,6 +156,16 @@ export default function BookingForm({
 
         const result = await createServiceJob(payload);
         if (result.success && result.trackingId) {
+            // Persist the client's details for their next visit
+            savePersistedData({
+                clientName: data.clientName,
+                clientPhone: data.clientPhone,
+                manufacturerId: String(data.manufacturerId ?? ""),
+                modelId: String(data.modelId ?? ""),
+                stringTypes: data.stringTypes ?? "",
+                mainsTensionLbs: data.mainsTensionLbs ?? "",
+                crossTensionLbs: data.crossTensionLbs ?? "",
+            });
             setSuccessTrackingId(result.trackingId);
         } else {
             alert("אירעה שגיאה בביצוע ההזמנה. אנא נסה שנית.");
@@ -133,180 +196,196 @@ export default function BookingForm({
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* 1. Client Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">שם מלא</label>
-                    <input
-                        {...register("clientName")}
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
-                        placeholder="ישראל ישראלי"
-                    />
-                    {errors.clientName && (
-                        <p className="mt-1 text-sm text-red-600">{errors.clientName.message}</p>
-                    )}
+        <>
+            {/* Pre-filled banner — shown only when localStorage data was found */}
+            {isPreFilled && (
+                <div className="flex items-center justify-between gap-2 bg-blue-50 border border-blue-200 text-blue-700 text-sm rounded-xl px-4 py-2.5 mb-2">
+                    <span>👋 ברוכ/ה השב/ה! מילאנו מראש את הפרטים מהביקור הקודם שלך.</span>
+                    <button
+                        type="button"
+                        onClick={() => setIsPreFilled(false)}
+                        className="text-blue-400 hover:text-blue-600 font-bold text-base leading-none flex-shrink-0"
+                        aria-label="סגור"
+                    >✕</button>
                 </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">טלפון (נייד)</label>
-                    <input
-                        {...register("clientPhone")}
-                        type="tel"
-                        dir="ltr"
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left text-gray-900 bg-white"
-                        placeholder="050-1234567"
-                    />
-                    {errors.clientPhone && (
-                        <p className="mt-1 text-sm text-red-600">{errors.clientPhone.message}</p>
-                    )}
-                </div>
-            </div>
-
-            <hr className="border-gray-200" />
-
-            {/* 2. Racquet Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">יצרן מחבט</label>
-                    <select
-                        {...register("manufacturerId")}
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white text-gray-900"
-                    >
-                        <option value="">-- בחר יצרן --</option>
-                        {initialManufacturers.map((m) => (
-                            <option key={m.id} value={m.id}>
-                                {m.name}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.manufacturerId && (
-                        <p className="mt-1 text-sm text-red-600">{errors.manufacturerId.message}</p>
-                    )}
-                </div>
-
-                {!isOtherManufacturer && (
+            )}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {/* 1. Client Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">דגם מחבט</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">שם מלא</label>
+                        <input
+                            {...register("clientName")}
+                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
+                            placeholder="ישראל ישראלי"
+                        />
+                        {errors.clientName && (
+                            <p className="mt-1 text-sm text-red-600">{errors.clientName.message}</p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">טלפון (נייד)</label>
+                        <input
+                            {...register("clientPhone")}
+                            type="tel"
+                            dir="ltr"
+                            maxLength={10}
+                            pattern="05\d{8}"
+                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left text-gray-900 bg-white"
+                            placeholder="0501234567"
+                        />
+                        {errors.clientPhone && (
+                            <p className="mt-1 text-sm text-red-600">{errors.clientPhone.message}</p>
+                        )}
+                    </div>
+                </div>
+
+                <hr className="border-gray-200" />
+
+                {/* 2. Racquet Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">יצרן מחבט</label>
                         <select
-                            {...register("modelId")}
-                            disabled={models.length === 0}
-                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
+                            {...register("manufacturerId")}
+                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white text-gray-900"
                         >
-                            <option value="">-- בחר דגם --</option>
-                            {models.map((m) => (
+                            <option value="">-- בחר יצרן --</option>
+                            {initialManufacturers.map((m) => (
                                 <option key={m.id} value={m.id}>
                                     {m.name}
                                 </option>
                             ))}
                         </select>
+                        {errors.manufacturerId && (
+                            <p className="mt-1 text-sm text-red-600">{errors.manufacturerId.message}</p>
+                        )}
+                    </div>
+
+                    {!isOtherManufacturer && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">דגם מחבט</label>
+                            <select
+                                {...register("modelId")}
+                                disabled={models.length === 0}
+                                className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
+                            >
+                                <option value="">-- בחר דגם --</option>
+                                {models.map((m) => (
+                                    <option key={m.id} value={m.id}>
+                                        {m.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                </div>
+
+                {(isOtherManufacturer || isOtherModel) && (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            נא לפרט דגם / יצרן:
+                        </label>
+                        <input
+                            {...register("customRacquetInfo")}
+                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
+                            placeholder="למשל: סלאזינגר פרו 95"
+                        />
                     </div>
                 )}
-            </div>
 
-            {(isOtherManufacturer || isOtherModel) && (
+                <hr className="border-gray-200" />
+
+                {/* 3. Stringing Preferences */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        נא לפרט דגם / יצרן:
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">סוג גיד מבוקש</label>
                     <input
-                        {...register("customRacquetInfo")}
+                        {...register("stringTypes")}
                         className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
-                        placeholder="למשל: סלאזינגר פרו 95"
+                        placeholder="למשל: Babolat RPM Blast או שילוב (היברידי)"
                     />
-                </div>
-            )}
-
-            <hr className="border-gray-200" />
-
-            {/* 3. Stringing Preferences */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">סוג גיד מבוקש</label>
-                <input
-                    {...register("stringTypes")}
-                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
-                    placeholder="למשל: Babolat RPM Blast או שילוב (היברידי)"
-                />
-                {errors.stringTypes && (
-                    <p className="mt-1 text-sm text-red-600">{errors.stringTypes.message}</p>
-                )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        מתיחת אורך (Mains) - Lbs
-                    </label>
-                    <input
-                        {...register("mainsTensionLbs")}
-                        type="number"
-                        dir="ltr"
-                        className={`w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left bg-white ${watch("mainsTensionLbs") === "52" ? "text-gray-400" : "text-gray-900"}`}
-                        placeholder="52"
-                    />
+                    {errors.stringTypes && (
+                        <p className="mt-1 text-sm text-red-600">{errors.stringTypes.message}</p>
+                    )}
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        מתיחת לרוחב (Crosses) - Lbs
-                    </label>
-                    <input
-                        {...register("crossTensionLbs")}
-                        type="number"
-                        dir="ltr"
-                        className={`w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left bg-white ${watch("crossTensionLbs") === "51" ? "text-gray-400" : "text-gray-900"}`}
-                        placeholder="52"
-                    />
+                <div className="grid grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            מתיחת אורך (Mains) - Lbs
+                        </label>
+                        <input
+                            {...register("mainsTensionLbs")}
+                            type="number"
+                            dir="ltr"
+                            className={`w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left bg-white ${watch("mainsTensionLbs") === "52" ? "text-gray-400" : "text-gray-900"}`}
+                            placeholder="52"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            מתיחת לרוחב (Crosses) - Lbs
+                        </label>
+                        <input
+                            {...register("crossTensionLbs")}
+                            type="number"
+                            dir="ltr"
+                            className={`w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left bg-white ${watch("crossTensionLbs") === "51" ? "text-gray-400" : "text-gray-900"}`}
+                            placeholder="52"
+                        />
+                    </div>
                 </div>
-            </div>
 
-            <hr className="border-gray-200" />
+                <hr className="border-gray-200" />
 
-            {/* 4. Details */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">כמות מחבטים</label>
-                    <input
-                        {...register("racquetCount")}
-                        type="number"
-                        min="1"
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">עבור שזירה שונה, צור הזמנה נפרדת.</p>
+                {/* 4. Details */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">כמות מחבטים</label>
+                        <input
+                            {...register("racquetCount")}
+                            type="number"
+                            min="1"
+                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">עבור שזירה שונה, צור הזמנה נפרדת.</p>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">דחיפות</label>
+                        <select
+                            {...register("urgency")}
+                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white text-gray-900"
+                        >
+                            <option value="Standard">רגיל (Standard)</option>
+                            <option value="Express">אקספרס (Express)</option>
+                            <option value="Immediate">דחוף - עכשיו! (Immediate)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">תאריך איסוף מבוקש</label>
+                        <input
+                            {...register("dueDate")}
+                            type="date"
+                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
+                        />
+                    </div>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">דחיפות</label>
-                    <select
-                        {...register("urgency")}
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white text-gray-900"
+                {/* Submit */}
+                <div className="pt-4">
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl disabled:bg-blue-300 transition"
                     >
-                        <option value="Standard">רגיל (Standard)</option>
-                        <option value="Express">אקספרס (Express)</option>
-                        <option value="Immediate">דחוף - עכשיו! (Immediate)</option>
-                    </select>
+                        {isSubmitting ? "שולח..." : "שלח בקשת הזמנה"}
+                    </button>
                 </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">תאריך איסוף מבוקש</label>
-                    <input
-                        {...register("dueDate")}
-                        type="date"
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
-                    />
-                </div>
-            </div>
-
-            {/* Submit */}
-            <div className="pt-4">
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl disabled:bg-blue-300 transition"
-                >
-                    {isSubmitting ? "שולח..." : "שלח בקשת הזמנה"}
-                </button>
-            </div>
-        </form>
+            </form>
+        </>
     );
 }
