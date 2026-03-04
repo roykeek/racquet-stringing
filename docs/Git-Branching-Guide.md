@@ -90,6 +90,27 @@ git push
 
 ---
 
+## Protecting the `main` Branch (GitHub Settings)
+
+Branch protection rules prevent accidental direct pushes to `main` and enforce a clean Pull Request workflow.
+
+### Recommended Settings for a Solo Developer
+
+Go to: **GitHub → Your Repo → Settings → Branches → Add classic branch protection rule**
+
+Set **Branch name pattern** to `main`, then configure:
+
+| Setting | Value | Why |
+| :--- | :--- | :--- |
+| Require a pull request before merging | ✅ On | Forces all changes through a PR — no accidental direct pushes |
+| Required approvals | **0** | You're solo — setting this to 1 would block you from merging your own PRs |
+| Require status checks to pass | Optional | Enable only if you have CI/automated tests set up |
+| Include administrators | ✅ On | Ensures the rule applies to you as the repo owner too |
+
+> ⚠️ **Why 0 approvals?** GitHub does not count self-approvals. If you set required approvals to 1 with no other collaborators, you would be permanently blocked from merging.
+>
+> 💡 With these settings, you still benefit from the PR review step (you review your own diff before merging), but you are never blocked from completing a merge.
+
 ---
 
 ## How to Rename a Branch
