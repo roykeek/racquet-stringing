@@ -1,11 +1,161 @@
 [
     {
+        "brand": "Babolat",
+        "name": "RPM Blast"
+    },
+    {
+        "brand": "Babolat",
+        "name": "RPM Power",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Babolat",
+        "name": "RPM Rough"
+    },
+    {
+        "brand": "Babolat",
+        "name": "RPM Soft",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Babolat",
+        "name": "VS Touch"
+    },
+    {
+        "brand": "Babolat",
+        "name": "Xalt",
+        "type": "Multifilament"
+    },
+    {
+        "brand": "Babolat",
+        "name": "Xcel"
+    },
+    {
+        "brand": "Babolat",
+        "name": "Xplore",
+        "type": "Multifilament"
+    },
+    {
+        "brand": "Babolat",
+        "name": "Syn Gut"
+    },
+    {
+        "brand": "Dunlop",
+        "name": "Explosive Bite",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Dunlop",
+        "name": "Explosive Speed",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Dunlop",
+        "name": "Explosive Tour",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Dunlop",
+        "name": "Iconic All",
+        "type": "Multifilament"
+    },
+    {
+        "brand": "Dunlop",
+        "name": "Iconic Speed",
+        "type": "Multifilament"
+    },
+    {
+        "brand": "Dunlop",
+        "name": "Iconic Touch",
+        "type": "Multifilament"
+    },
+    {
+        "brand": "Gamma",
+        "name": "TNT2"
+    },
+    {
+        "brand": "Gamma",
+        "name": "TNT2 React Pro",
+        "type": "Synthetic Gut"
+    },
+    {
+        "brand": "Genesis",
+        "name": "Hexonic Power",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Grapplesnake",
+        "name": "Tour M8",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Grapplesnake",
+        "name": "Paradox Pro",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Head",
+        "name": "Hawk"
+    },
+    {
+        "brand": "Head",
+        "name": "Hawk Power",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Head",
+        "name": "Lynx"
+    },
+    {
+        "brand": "Head",
+        "name": "Lynx Touch",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Head",
+        "name": "Lynx Tour",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Head",
+        "name": "Sonic Pro Tour rPET",
+        "type": "Co-Poly (Recycled)"
+    },
+    {
+        "brand": "Head",
+        "name": "Velocity MLT"
+    },
+    {
+        "brand": "Head",
+        "name": "Velocity MLT Power",
+        "type": "Multifilament"
+    },
+    {
+        "brand": "Kirschbaum",
+        "name": "Max Power"
+    },
+    {
         "brand": "Luxilon",
         "name": "ALU Power"
     },
     {
         "brand": "Luxilon",
+        "name": "ALU Power Ocean Blue",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Luxilon",
         "name": "ALU Power Rough"
+    },
+    {
+        "brand": "Luxilon",
+        "name": "Eco Power",
+        "type": "Co-Poly (Recycled)"
+    },
+    {
+        "brand": "Luxilon",
+        "name": "Eco Rough",
+        "type": "Co-Poly (Recycled)"
     },
     {
         "brand": "Luxilon",
@@ -20,24 +170,52 @@
         "name": "4G Rough"
     },
     {
-        "brand": "Babolat",
-        "name": "RPM Blast"
+        "brand": "Prince",
+        "name": "Phantom Pro",
+        "type": "Co-Poly"
     },
     {
-        "brand": "Babolat",
-        "name": "RPM Rough"
+        "brand": "Prince",
+        "name": "Phantom Touch",
+        "type": "Co-Poly"
     },
     {
-        "brand": "Babolat",
-        "name": "VS Touch"
+        "brand": "Prince",
+        "name": "Ripcord 98 XS",
+        "type": "Co-Poly"
     },
     {
-        "brand": "Babolat",
-        "name": "Xcel"
+        "brand": "Prince",
+        "name": "Synthetic Gut"
     },
     {
-        "brand": "Babolat",
-        "name": "Syn Gut"
+        "brand": "Prince",
+        "name": "Vortex Triad",
+        "type": "Co-Poly / Hybrid"
+    },
+    {
+        "brand": "Restring",
+        "name": "Zero",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Restring",
+        "name": "Sync",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Signum Pro",
+        "name": "Poly Plasma"
+    },
+    {
+        "brand": "Solinco",
+        "name": "Confidential",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Solinco",
+        "name": "Confidential Soft",
+        "type": "Co-Poly"
     },
     {
         "brand": "Solinco",
@@ -45,35 +223,27 @@
     },
     {
         "brand": "Solinco",
-        "name": "Tour Bite"
+        "name": "Hyper-G Soft",
+        "type": "Co-Poly"
     },
     {
         "brand": "Solinco",
-        "name": "Confidential"
+        "name": "Mach-10",
+        "type": "Co-Poly"
     },
     {
-        "brand": "Wilson",
-        "name": "NXT"
-    },
-    {
-        "brand": "Wilson",
-        "name": "Sensation"
-    },
-    {
-        "brand": "Wilson",
-        "name": "Revolve"
-    },
-    {
-        "brand": "Wilson",
-        "name": "Champions Choice"
+        "brand": "Solinco",
+        "name": "Tour Bite"
     },
     {
         "brand": "Tecnifibre",
-        "name": "X-One Biphase"
+        "name": "Fire",
+        "type": "Co-Poly"
     },
     {
         "brand": "Tecnifibre",
-        "name": "Razor Code"
+        "name": "HDMX",
+        "type": "Multifilament Poly-Fusion"
     },
     {
         "brand": "Tecnifibre",
@@ -84,16 +254,83 @@
         "name": "NRG2"
     },
     {
-        "brand": "Head",
-        "name": "Lynx"
+        "brand": "Tecnifibre",
+        "name": "Razor Code"
     },
     {
-        "brand": "Head",
-        "name": "Hawk"
+        "brand": "Tecnifibre",
+        "name": "Razor Soft",
+        "type": "Co-Poly"
     },
     {
-        "brand": "Head",
-        "name": "Velocity MLT"
+        "brand": "Tecnifibre",
+        "name": "Triax",
+        "type": "Multifilament Poly-Fusion"
+    },
+    {
+        "brand": "Tecnifibre",
+        "name": "X-One Biphase"
+    },
+    {
+        "brand": "Toroline",
+        "name": "Caviar",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Toroline",
+        "name": "Enso Pro",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Toroline",
+        "name": "K-Pop",
+        "type": "Co-Poly Hybrid"
+    },
+    {
+        "brand": "Toroline",
+        "name": "O-Toro",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Toroline",
+        "name": "Wasabi X",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Tru Pro",
+        "name": "Pure Rush",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Volkl",
+        "name": "V-Square",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Wilson",
+        "name": "Champions Choice"
+    },
+    {
+        "brand": "Wilson",
+        "name": "NXT"
+    },
+    {
+        "brand": "Wilson",
+        "name": "NXT Soft",
+        "type": "Multifilament"
+    },
+    {
+        "brand": "Wilson",
+        "name": "Revolve"
+    },
+    {
+        "brand": "Wilson",
+        "name": "Revolve Twist",
+        "type": "Co-Poly"
+    },
+    {
+        "brand": "Wilson",
+        "name": "Sensation"
     },
     {
         "brand": "Yonex",
@@ -101,26 +338,21 @@
     },
     {
         "brand": "Yonex",
-        "name": "Poly Tour Rev"
+        "name": "Poly Tour Rev",
+        "type": "Co-Poly"
     },
     {
         "brand": "Yonex",
         "name": "Poly Tour Strike"
     },
     {
-        "brand": "Prince",
-        "name": "Synthetic Gut"
+        "brand": "Yonex",
+        "name": "Rexis Activate",
+        "type": "Multifilament"
     },
     {
-        "brand": "Gamma",
-        "name": "TNT2"
-    },
-    {
-        "brand": "Signum Pro",
-        "name": "Poly Plasma"
-    },
-    {
-        "brand": "Kirschbaum",
-        "name": "Max Power"
+        "brand": "Yonex",
+        "name": "Rexis Speed",
+        "type": "Multifilament"
     }
 ]
