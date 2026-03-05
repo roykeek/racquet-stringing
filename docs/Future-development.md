@@ -9,10 +9,10 @@ This document serves as a living repository for ideas, features, and improvement
 
 ## 🚀 Phase 2 — Client Recognition & String Standardisation
 
-- [/] **Phone Lookup (Smart History):** After the client types their phone number, query the DB for their last 3 unique racquet setups and show as clickable chips. See `docs/Client-Recognition.md` for full spec.
+- [x] **Phone Lookup (Smart History):** After the client types their phone number, query the DB for their last 3 unique racquet setups and show as clickable chips. See `docs/Client-Recognition.md` for full spec.
 - [x] **Split `stringTypes` → `stringMain` + `stringCross`:** Schema change to support hybrid setups and enable accurate material tracking. Existing test data can be deleted (no migration needed).
 - [x] **Smart Autocomplete for strings:** Static JSON list of ~30 popular strings with fuzzy search on the booking form. Custom entry allowed for unlisted strings.
-- [ ] **Rate limiting:** Required before shipping Phase 2 phone lookup to production. Prevent enumeration attacks on `/api/client-history`. Recommended: Upstash Redis + `@upstash/ratelimit`.
+- [x] **Rate limiting:** Required before shipping Phase 2 phone lookup to production. Prevent enumeration attacks on `/api/client-history`. Recommended: Upstash Redis + `@upstash/ratelimit`.
 
 ## 📊 Phase 3 — Stringer Dashboard: Material Usage & Reporting
 

@@ -1,20 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-// TODO: Add Upstash rate limiting before shipping to production.
-// See docs/Client-Recognition.md §Security Requirements.
-// Example:
-//   import { Ratelimit } from "@upstash/ratelimit";
-//   import { Redis } from "@upstash/redis";
-//   const ratelimit = new Ratelimit({ redis: Redis.fromEnv(), limiter: Ratelimit.slidingWindow(10, "60 s") });
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+// Initialize rate limiter if env vars are present
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+let ratelimit: Ratelimit | null = null;
+if (redisUrl && redisToken) {
+    ratelimit = new Ratelimit({
+        redis: new Redis({
+            url: redisUrl,
+            token: redisToken,
+        }),
+        limiter: Ratelimit.slidingWindow(5, "60 s"),
+        analytics: true,
+    });
+}
 
 /**
  * GET /api/client-history?phone=05XXXXXXXX
  *
  * Returns the client's last 3 unique racquet setups (grouped by modelId).
  * Only equipment fields are returned — never PII (name, etc.).
+ * Protected by strict rate limiting to prevent phone number enumeration.
  */
 export async function GET(request: NextRequest) {
+    // 1. Rate Limiting Check
+    if (ratelimit) {
+        // Extract IP (works locally and on Vercel)
+        // NextRequest.ip is only available in Edge runtime, so we fall back to headers
+        const ip = request.headers.get("x-forwarded-for") ?? "anonymous";
+        const { success, limit, remaining, reset } = await ratelimit.limit(`history_api_${ip}`);
+
+        if (!success) {
+            console.warn(`Rate limit exceeded for IP: ${ip}`);
+            return NextResponse.json(
+                { error: "Too many requests. Please try again later." },
+                {
+                    status: 429,
+                    headers: {
+                        "X-RateLimit-Limit": limit.toString(),
+                        "X-RateLimit-Remaining": remaining.toString(),
+                        "X-RateLimit-Reset": reset.toString(),
+                    },
+                }
+            );
+        }
+    } else {
+        console.warn("Upstash Redis credentials missing — rate limiting is DISABLED.");
+    }
+
+    // 2. Phone Validation
     const phone = request.nextUrl.searchParams.get("phone");
 
     // Validate: must be a 10-digit Israeli mobile number
@@ -25,6 +64,7 @@ export async function GET(request: NextRequest) {
         );
     }
 
+    // 3. Query Database
     try {
         // Try 18-month window first
         let results = await queryClientHistory(phone, 18);

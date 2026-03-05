@@ -176,11 +176,12 @@ Chips appear **between the contact info section and the racquet section** — co
 4. Client can still edit any value freely
 5. If no history → nothing shown, form works normally
 
-### Security Requirements (must implement before shipping)
+### Security Requirements (Implemented)
 
-- **Rate limiting** on the route to prevent enumeration attacks (e.g. Upstash Redis + `@upstash/ratelimit`, or Vercel's built-in rate limiting on Pro).
+- **Strict Rate Limiting:** We use Upstash Redis (`@upstash/ratelimit`) to enforce a limit of **5 requests per minute per IP address** on the `/api/client-history` route.
+  - *Why?* To prevent **enumeration attacks**. Without a limit, a malicious bot could rapidly guess millions of Israeli phone numbers (050-000-0000, 050-000-0001, etc.) to figure out exactly which numbers belong to your clients and what racquets they own. Rate limiting stops this dead in its tracks, protecting client privacy and saving Vercel/Turso server costs.
 - **Only return technical/equipment fields** — never name, address, or other PII.
-- **Debounce** the client-side trigger to 600ms, and only fire when the phone number is 10 digits.
+- **Debounce** the client-side trigger to 600ms, and only fire when the phone number is exactly 10 digits.
 
 ### Why Phase 2 Matters
 

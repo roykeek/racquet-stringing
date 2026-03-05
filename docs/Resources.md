@@ -41,6 +41,8 @@
 | --- | --- | --- |
 | bcrypt | 6.0.0 | Password hashing |
 | HTTP-only cookies | — | Session management |
+| @upstash/ratelimit | 2.0.5 | API rate limiting |
+| @upstash/redis | 1.34.4 | Redis driver for rate limiting |
 
 ### Hosting & Deployment
 

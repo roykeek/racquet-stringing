@@ -14,6 +14,8 @@
     "@libsql/client": "^0.8.0",
     "@prisma/adapter-libsql": "^5.22.0",
     "@prisma/client": "^5.22.0",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.36.3",
     "bcrypt": "^6.0.0",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.575.0",
