@@ -44,6 +44,14 @@
 | @upstash/ratelimit | 2.0.5 | API rate limiting |
 | @upstash/redis | 1.34.4 | Redis driver for rate limiting |
 
+### Testing & QA (In Progress)
+
+| Technology | Version | Purpose |
+| --- | --- | --- |
+| Jest | (pending) | Core test runner & assertion library |
+| React Testing Library | (pending) | Component and generic React hook testing utilities |
+| jest-mock-extended | (pending) | Type-safe mocking for Prisma database calls |
+
 ### Hosting & Deployment
 
 | Service | Purpose |

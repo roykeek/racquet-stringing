@@ -13,12 +13,7 @@ type StringerOption = {
     name: string;
 };
 
-const loginSchema = z.object({
-    stringerId: z.coerce.number().min(1, "יש לבחור משתמש"),
-    password: z.string().min(1, "יש להזין סיסמה"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { loginSchema, LoginFormValues } from "@/lib/validations";
 
 export default function StringerLoginForm({
     stringers,
