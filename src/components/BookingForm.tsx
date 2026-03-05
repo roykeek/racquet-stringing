@@ -250,11 +250,14 @@ export default function BookingForm({
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">טלפון (נייד)</label>
                         <input
-                            {...register("clientPhone")}
+                            {...register("clientPhone", {
+                                onChange: (e) => {
+                                    e.target.value = e.target.value.replace(/\D/g, "");
+                                }
+                            })}
                             type="tel"
                             dir="ltr"
                             maxLength={10}
-                            pattern="05\d{8}"
                             className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left text-gray-900 bg-white"
                             placeholder="0501234567"
                         />
