@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom';
+import './src/__mocks__/prisma';
 
 // Mock Next.js navigation hooks globally since we aren't running tests inside a Next.js App Router context
 jest.mock('next/navigation', () => ({

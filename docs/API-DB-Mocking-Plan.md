@@ -48,3 +48,13 @@ We will test that incorrect passwords or non-existent user lookups return proper
 
 * **False Confidence of Integrity:** Mocking tests the *logic* around the database, but it assumes the database schema is correct. It will not catch if you accidentally add a column name that doesn't actually exist in SQLite. E2E tests are still required for full system validation.
 * **Maintenance Overhead:** If the Prisma schema frequently changes, the TypeScript mock return values in the test files must be manually kept in sync.
+
+## 6. Current Coverage Status
+
+The unit tests for the API layer are located in `src/app/actions.test.ts`.
+
+| File | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s |
+| --- | --- | --- | --- | --- | --- |
+| `src/app/actions.ts` | 68.65 | 50 | 88.88 | 70 | 56-57, 83-84, 91-99, 146-147, ... |
+
+*Note: The uncovered lines represent specific error-catching UI pathways (e.g., throwing a generic network failure during deactivation or duplicate stringer creation) which are lower priority than the primary success/validation pathways tested.*
