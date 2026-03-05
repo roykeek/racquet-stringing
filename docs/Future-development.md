@@ -6,7 +6,8 @@ This document serves as a living repository for ideas, features, and improvement
 
 - [ ] Set up an end-to-end automated testing framework (e.g., Playwright or Cypress).
 - [ ] Add unit and component tests (e.g., Jest + React Testing Library) to ensure reliability.
-  - [x] Defined strategy and scope in `docs/Unit-Testing-Plan.md`.
+  - [x] Defined unit testing strategy in `docs/Unit-Testing-Plan.md`.
+  - [x] Defined Server Action / Database test strategy in `docs/API-DB-Mocking-Plan.md`.
 
 ## 🚀 Phase 2 — Client Recognition & String Standardisation
 
