@@ -94,6 +94,21 @@ export default function StringAutocomplete({
         setIsOpen(true);
     };
 
+    // Clear invalid input on blur (e.g. partial search terms like "Rz")
+    const handleBlur = useCallback(() => {
+        // Small delay so dropdown click registers before blur clears the value
+        setTimeout(() => {
+            const trimmed = value.trim();
+            if (trimmed.length === 0) return;
+            const isValid = allStrings.some(
+                (s) => `${s.brand} ${s.name}`.toLowerCase() === trimmed.toLowerCase()
+            );
+            if (!isValid) {
+                onChange("");
+            }
+        }, 150);
+    }, [value, onChange]);
+
     return (
         <div ref={wrapperRef} className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -105,6 +120,7 @@ export default function StringAutocomplete({
                 value={value}
                 onChange={(e) => handleInputChange(e.target.value)}
                 onFocus={handleFocus}
+                onBlur={handleBlur}
                 className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
                 placeholder={placeholder}
                 autoComplete="off"
