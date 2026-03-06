@@ -35,70 +35,73 @@ export default function MaterialUsageReport() {
     }, [startDate, endDate, filterString]);
 
     return (
-        <div className="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700">
-            <h2 className="text-xl font-bold mb-4">Material Usage Report</h2>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-emerald-200">
+            <h2 className="text-xl font-bold text-emerald-800 mb-6 flex items-center justify-between border-b border-emerald-100 pb-2">
+                <span>דוח שימוש בגידים (מלאי)</span>
+            </h2>
 
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div>
-                    <label className="block text-sm font-medium mb-1">Start Date</label>
+            <div className="flex flex-col md:flex-row gap-4 mb-6 bg-emerald-50 p-4 rounded-lg border border-emerald-100 items-end">
+                <div className="flex flex-col">
+                    <label className="text-xs text-emerald-800 font-medium mb-1">מתאריך</label>
                     <input
                         type="date"
                         value={startDate}
                         onChange={e => setStartDate(e.target.value)}
-                        className="p-2 border rounded-md dark:bg-zinc-900 dark:border-zinc-700"
+                        className="border-emerald-200 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white"
                     />
                 </div>
-                <div>
-                    <label className="block text-sm font-medium mb-1">End Date</label>
+                <div className="flex flex-col">
+                    <label className="text-xs text-emerald-800 font-medium mb-1">עד תאריך</label>
                     <input
                         type="date"
                         value={endDate}
                         onChange={e => setEndDate(e.target.value)}
-                        className="p-2 border rounded-md dark:bg-zinc-900 dark:border-zinc-700"
+                        className="border-emerald-200 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white"
                     />
                 </div>
-                <div className="flex-grow">
-                    <label className="block text-sm font-medium mb-1">Filter String</label>
+                <div className="flex-grow flex flex-col">
+                    <label className="text-xs text-emerald-800 font-medium mb-1">חיפוש גיד ספציפי</label>
                     <input
                         type="text"
-                        placeholder="e.g. RPM Blast..."
+                        placeholder="למשל: RPM Blast..."
                         value={filterString}
                         onChange={e => setFilterString(e.target.value)}
-                        className="p-2 border rounded-md w-full dark:bg-zinc-900 dark:border-zinc-700"
+                        className="p-2 border border-emerald-200 rounded-lg w-full focus:border-emerald-500 focus:ring-emerald-500 bg-white text-sm"
+                        dir="ltr"
                     />
                 </div>
-                <div className="flex items-end">
+                <div>
                     <button
                         onClick={() => { setStartDate(""); setEndDate(""); setFilterString(""); }}
-                        className="p-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-zinc-700 rounded-md transition-colors"
+                        className="p-2 text-sm text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors font-medium border border-transparent"
                     >
-                        Clear Filters
+                        נקה סינון
                     </button>
                 </div>
             </div>
 
             {loading ? (
-                <div className="text-center py-8 text-zinc-500">Loading report...</div>
+                <div className="text-center py-8 text-emerald-600 font-medium">טוען נתונים...</div>
             ) : data.length === 0 ? (
-                <div className="text-center py-8 text-zinc-500">No usage data found for this period.</div>
+                <div className="text-center py-8 text-gray-500">לא נמצאו נתוני שימוש בגידים בתקופה זו.</div>
             ) : (
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="border-b dark:border-zinc-700">
-                                <th className="p-3">String Name</th>
-                                <th className="p-3">Used in Mains</th>
-                                <th className="p-3">Used in Crosses</th>
-                                <th className="p-3 font-bold">Total Jobs</th>
+                <div className="overflow-x-auto rounded-lg border border-gray-200">
+                    <table className="w-full text-right border-collapse bg-white">
+                        <thead className="bg-gray-50 text-gray-700">
+                            <tr className="border-b border-gray-200">
+                                <th className="p-3 font-semibold">שם הגיד</th>
+                                <th className="p-3 font-semibold text-center text-emerald-700">שזור לאורך (Mains)</th>
+                                <th className="p-3 font-semibold text-center text-emerald-700">שזור לרוחב (Crosses)</th>
+                                <th className="p-3 font-bold text-center text-gray-900">סה״כ שימושים</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-gray-100">
                             {data.map(item => (
-                                <tr key={item.stringName} className="border-b dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700/50">
-                                    <td className="p-3 font-medium">{item.stringName}</td>
-                                    <td className="p-3">{item.mainsCount}</td>
-                                    <td className="p-3">{item.crossesCount}</td>
-                                    <td className="p-3 font-bold text-blue-600 dark:text-blue-400">{item.totalCount}</td>
+                                <tr key={item.stringName} className="hover:bg-emerald-50/50 transition-colors">
+                                    <td className="p-3 font-medium text-gray-800" dir="ltr">{item.stringName}</td>
+                                    <td className="p-3 text-center text-gray-600">{item.mainsCount}</td>
+                                    <td className="p-3 text-center text-gray-600">{item.crossesCount}</td>
+                                    <td className="p-3 text-center font-bold text-emerald-700">{item.totalCount}</td>
                                 </tr>
                             ))}
                         </tbody>

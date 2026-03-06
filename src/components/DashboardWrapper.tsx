@@ -110,7 +110,7 @@ export default function DashboardWrapper({
                 <RestockAlerts />
 
                 <div className="flex justify-end mb-6">
-                    <ExcelExportButton jobs={allJobs as any} />
+                    <ExcelExportButton />
                 </div>
 
                 <div className="grid grid-cols-1 min-[500px]:grid-cols-2 lg:grid-cols-3 gap-8">

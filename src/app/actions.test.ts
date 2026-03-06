@@ -212,6 +212,39 @@ describe('Server Actions (API Layer)', () => {
                 })
             );
         });
+        it('getJobsForExport() should return jobs within the specified date range', async () => {
+            const fakeJobs = [{ id: 1, clientName: 'Export Test' }];
+            prismaMock.serviceJob.findMany.mockResolvedValue(fakeJobs as any);
+
+            const { getJobsForExport } = require('./actions');
+
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - 1);
+            const endDate = new Date();
+
+            const result = await getJobsForExport(startDate, endDate);
+
+            expect(result).toHaveLength(1);
+            expect(prismaMock.serviceJob.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    where: {
+                        createdAt: {
+                            gte: startDate,
+                            lte: expect.any(Date) // end of day calculation
+                        }
+                    }
+                })
+            );
+        });
+
+        it('getJobsForExport() should throw an error if startDate is older than 2 years', async () => {
+            const { getJobsForExport } = require('./actions');
+
+            const oldDate = new Date();
+            oldDate.setFullYear(oldDate.getFullYear() - 3);
+
+            await expect(getJobsForExport(oldDate, new Date())).rejects.toThrow('Cannot export data older than 2 years.');
+        });
     });
 
     describe('Authentication Operations', () => {

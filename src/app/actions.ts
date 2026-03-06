@@ -281,3 +281,38 @@ export async function getRestockAlerts(threshold: number = 10, daysLookback: num
         .filter(item => item.totalCount >= threshold)
         .map(item => ({ stringName: item.stringName, count: item.totalCount }));
 }
+
+export async function getJobsForExport(startDate: Date, endDate: Date) {
+    const twoYearsAgo = new Date();
+    twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+
+    // Padding the limit by a couple days to avoid strict timezone boundary issues
+    twoYearsAgo.setDate(twoYearsAgo.getDate() - 2);
+
+    if (startDate < twoYearsAgo) {
+        throw new Error("Cannot export data older than 2 years.");
+    }
+
+    const endOfDay = new Date(endDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return prisma.serviceJob.findMany({
+        where: {
+            createdAt: {
+                gte: startDate,
+                lte: endOfDay
+            }
+        },
+        include: {
+            racquetModel: {
+                include: {
+                    manufacturer: true
+                }
+            },
+            stringer: true
+        },
+        orderBy: {
+            createdAt: "desc"
+        }
+    });
+}
