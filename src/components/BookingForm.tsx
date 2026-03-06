@@ -12,6 +12,7 @@ import RacquetHistoryChips, { RacquetChip } from "@/components/RacquetHistoryChi
 import StringAutocomplete from "@/components/StringAutocomplete";
 
 import { bookingSchema, BookingFormValues } from "@/lib/validations";
+import { formatDate } from "@/lib/dateUtils";
 
 export default function BookingForm({
     initialManufacturers,
@@ -387,12 +388,19 @@ export default function BookingForm({
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">תאריך איסוף מבוקש</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            תאריך איסוף מבוקש (DD/MM/YYYY)
+                        </label>
                         <input
                             {...register("dueDate")}
                             type="date"
                             className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
                         />
+                        {watch("dueDate") && (
+                            <span className="text-[10px] text-blue-600 mt-1 block">
+                                {formatDate(watch("dueDate"))}
+                            </span>
+                        )}
                     </div>
                 </div>
 

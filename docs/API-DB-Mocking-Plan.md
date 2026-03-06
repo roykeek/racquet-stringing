@@ -18,12 +18,12 @@ This guarantees fast, reliable, network-independent test runs.
 
 We will write unit tests for the functions exported in `src/app/actions.ts`.
 
-### A. Read Operations (e.g., `getModelsByManufacturerId`)
+### A. Read/Aggregate Operations (e.g., `getModelsByManufacturerId`, `getMaterialUsageReport`)
 
-We will verify that passing an ID properly filters the database call.
+We will verify that passing an ID properly filters the database call, and that aggregations correctly process database arrays.
 
-* **Mock Objective:** Set `prismaMock.racquetModel.findMany.mockResolvedValue([])`
-* **Assertion:** Did the function parse the arguments and successfully request the correct `where: { manufacturerId }` filter?
+* **Mock Objective:** Set `prismaMock.racquetModel.findMany.mockResolvedValue([])` or `prismaMock.serviceJob.findMany.mockResolvedValue([...])`.
+* **Assertion:** Did the function parse the arguments and successfully request the correct `where` filter? Did the material mapper output the correct totals for Mains and Crosses?
 
 ### B. Write Operations (e.g., `createServiceJob`)
 

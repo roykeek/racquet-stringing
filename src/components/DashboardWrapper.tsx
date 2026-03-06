@@ -4,6 +4,10 @@ import { useState } from "react";
 import { Wrench, LogOut, Phone, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { addStringer, logoutStringer, updateJobStatus, deactivateStringer } from "@/app/actions";
+import { formatDate } from "@/lib/dateUtils";
+import ExcelExportButton from "./ExcelExportButton";
+import RestockAlerts from "./RestockAlerts";
+import MaterialUsageReport from "./MaterialUsageReport";
 
 export default function DashboardWrapper({
     currentUser,
@@ -103,169 +107,180 @@ export default function DashboardWrapper({
                 </div>
             </header>
 
-            {/* Grid Layout */}
-            <main className="p-6 max-w-[1600px] mx-auto grid grid-cols-1 min-[500px]:grid-cols-2 lg:grid-cols-3 gap-8">
+            <main className="p-6 max-w-[1600px] mx-auto">
+                <RestockAlerts />
 
-                {/* Column 1 (Right): Waiting Queue */}
-                <section className="flex flex-col gap-4">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sticky top-24">
-                        <h2 className="text-xl font-bold text-gray-800 flex items-center justify-between mb-4 border-b pb-2">
-                            <span>תור המתנה</span>
-                            <span className="bg-blue-100 text-blue-700 text-sm py-1 px-3 rounded-full">{waitingQueue.length}</span>
-                        </h2>
-                        <div className="space-y-3 overflow-y-auto max-h-[75vh] pr-2">
-                            {waitingQueue.length === 0 ? (
-                                <p className="text-center text-gray-400 py-8">אין הזמנות חדשות</p>
-                            ) : (
-                                waitingQueue.map((job) => (
-                                    <JobCard
-                                        key={job.id}
-                                        job={job}
-                                        onAction={() => handleStatusChange(job.id, "Scheduled", currentUser.id)}
-                                        actionText="שבץ ליומן"
-                                    />
-                                ))
-                            )}
+                <div className="flex justify-end mb-6">
+                    <ExcelExportButton />
+                </div>
+
+                <div className="grid grid-cols-1 min-[500px]:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {/* Column 1 (Right): Waiting Queue */}
+                    <section className="flex flex-col gap-4">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sticky top-24">
+                            <h2 className="text-xl font-bold text-gray-800 flex items-center justify-between mb-4 border-b pb-2">
+                                <span>תור המתנה</span>
+                                <span className="bg-blue-100 text-blue-700 text-sm py-1 px-3 rounded-full">{waitingQueue.length}</span>
+                            </h2>
+                            <div className="space-y-3 overflow-y-auto max-h-[75vh] pr-2">
+                                {waitingQueue.length === 0 ? (
+                                    <p className="text-center text-gray-400 py-8">אין הזמנות חדשות</p>
+                                ) : (
+                                    waitingQueue.map((job) => (
+                                        <JobCard
+                                            key={job.id}
+                                            job={job}
+                                            onAction={() => handleStatusChange(job.id, "Scheduled", currentUser.id)}
+                                            actionText="שבץ ליומן"
+                                        />
+                                    ))
+                                )}
+                            </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
 
-                {/* Column 2 (Center): Scheduled (Shared Calendar View MVP) */}
-                <section className="flex flex-col gap-4">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sticky top-24">
-                        <h2 className="text-xl font-bold text-gray-800 flex items-center justify-between mb-4 border-b pb-2">
-                            <span>יומן שזירות (משותף)</span>
-                            <span className="bg-yellow-100 text-yellow-700 text-sm py-1 px-3 rounded-full">{scheduledJobs.length}</span>
-                        </h2>
-                        <div className="space-y-3 overflow-y-auto max-h-[75vh] pr-2">
-                            {scheduledJobs.length === 0 ? (
-                                <p className="text-center text-gray-400 py-8">אין הזמנות משובצות</p>
-                            ) : (
-                                scheduledJobs.map((job) => (
-                                    <JobCard
-                                        key={job.id}
-                                        job={job}
-                                        onAction={() => handleStatusChange(job.id, "In Process", currentUser.id)}
-                                        actionText="התחל עבודה"
-                                        showAssignee
-                                        highlight={job.stringerId === currentUser.id ? "yellow" : "gray"}
-                                    />
-                                ))
-                            )}
+                    {/* Column 2 (Center): Scheduled (Shared Calendar View MVP) */}
+                    <section className="flex flex-col gap-4">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sticky top-24">
+                            <h2 className="text-xl font-bold text-gray-800 flex items-center justify-between mb-4 border-b pb-2">
+                                <span>יומן שזירות (משותף)</span>
+                                <span className="bg-yellow-100 text-yellow-700 text-sm py-1 px-3 rounded-full">{scheduledJobs.length}</span>
+                            </h2>
+                            <div className="space-y-3 overflow-y-auto max-h-[75vh] pr-2">
+                                {scheduledJobs.length === 0 ? (
+                                    <p className="text-center text-gray-400 py-8">אין הזמנות משובצות</p>
+                                ) : (
+                                    scheduledJobs.map((job) => (
+                                        <JobCard
+                                            key={job.id}
+                                            job={job}
+                                            onAction={() => handleStatusChange(job.id, "In Process", currentUser.id)}
+                                            actionText="התחל עבודה"
+                                            showAssignee
+                                            highlight={job.stringerId === currentUser.id ? "yellow" : "gray"}
+                                        />
+                                    ))
+                                )}
+                            </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
 
-                {/* Column 3 (Left): Work Management */}
-                <section className="flex flex-col gap-6 min-[500px]:col-span-2 lg:col-span-1">
-                    <div className="bg-white rounded-xl shadow-sm border border-emerald-200 p-4 sticky top-24">
-                        <h2 className="text-xl font-bold text-emerald-800 flex items-center justify-between mb-4 border-b border-emerald-100 pb-2">
-                            <span>העבודות שלי</span>
-                            <span className="bg-emerald-100 text-emerald-700 text-sm py-1 px-3 rounded-full">{inProcessJobs.length}</span>
-                        </h2>
-                        <div className="space-y-3 mb-6">
-                            <h3 className="text-sm font-semibold text-gray-500 mb-2">בתהליך עבודה:</h3>
-                            {inProcessJobs.length === 0 ? (
-                                <p className="text-center text-gray-400 py-4 text-sm">אין מחבטים בעבודה כרגע</p>
-                            ) : (
-                                inProcessJobs.map((job) => (
-                                    <JobCard
-                                        key={job.id}
-                                        job={job}
-                                        onAction={() => handleStatusChange(job.id, "Completed", currentUser.id)}
-                                        actionText="סיים עבודה"
-                                        onSecondaryAction={() => handleStatusChange(job.id, "Scheduled", currentUser.id)}
-                                        secondaryActionText="החזר ליומן"
-                                        highlight="green"
-                                    />
-                                ))
-                            )}
-                        </div>
+                    {/* Column 3 (Left): Work Management */}
+                    <section className="flex flex-col gap-6 min-[500px]:col-span-2 lg:col-span-1">
+                        <div className="bg-white rounded-xl shadow-sm border border-emerald-200 p-4 sticky top-24">
+                            <h2 className="text-xl font-bold text-emerald-800 flex items-center justify-between mb-4 border-b border-emerald-100 pb-2">
+                                <span>העבודות שלי</span>
+                                <span className="bg-emerald-100 text-emerald-700 text-sm py-1 px-3 rounded-full">{inProcessJobs.length}</span>
+                            </h2>
+                            <div className="space-y-3 mb-6">
+                                <h3 className="text-sm font-semibold text-gray-500 mb-2">בתהליך עבודה:</h3>
+                                {inProcessJobs.length === 0 ? (
+                                    <p className="text-center text-gray-400 py-4 text-sm">אין מחבטים בעבודה כרגע</p>
+                                ) : (
+                                    inProcessJobs.map((job) => (
+                                        <JobCard
+                                            key={job.id}
+                                            job={job}
+                                            onAction={() => handleStatusChange(job.id, "Completed", currentUser.id)}
+                                            actionText="סיים עבודה"
+                                            onSecondaryAction={() => handleStatusChange(job.id, "Scheduled", currentUser.id)}
+                                            secondaryActionText="החזר ליומן"
+                                            highlight="green"
+                                        />
+                                    ))
+                                )}
+                            </div>
 
-                        <div className="space-y-3 border-t border-emerald-100 pt-4">
-                            <h3 className="text-sm font-semibold text-gray-500 mb-2">היסטוריה (הושלם):</h3>
-                            {completedJobs.length === 0 ? (
-                                <p className="text-center text-gray-400 py-4 text-sm">לא הושלמו עבודות</p>
-                            ) : (
-                                completedJobs.slice(0, 5).map((job) => (
-                                    <div key={job.id} className="p-3 bg-gray-50 border border-gray-100 rounded-lg flex justify-between items-center opacity-70">
-                                        <span className="font-medium text-gray-700 text-sm">{job.clientName}</span>
-                                        <span className="text-xs text-gray-500">{new Date(job.createdAt).toLocaleDateString("he-IL")}</span>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                            <div className="space-y-3 border-t border-emerald-100 pt-4">
+                                <h3 className="text-sm font-semibold text-gray-500 mb-2">היסטוריה (הושלם):</h3>
+                                {completedJobs.length === 0 ? (
+                                    <p className="text-center text-gray-400 py-4 text-sm">לא הושלמו עבודות</p>
+                                ) : (
+                                    completedJobs.slice(0, 5).map((job) => (
+                                        <div key={job.id} className="p-3 bg-gray-50 border border-gray-100 rounded-lg flex justify-between items-center opacity-70">
+                                            <span className="font-medium text-gray-700 text-sm">{job.clientName}</span>
+                                            <span className="text-xs text-gray-500">{formatDate(job.createdAt)}</span>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
 
-                        <div className="mt-4 pt-4 border-t border-emerald-100 text-center">
-                            {!isAddingStringer ? (
-                                <button
-                                    onClick={() => setIsAddingStringer(true)}
-                                    className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-3 px-4 rounded-xl transition border border-emerald-200 shadow-sm text-sm"
-                                >
-                                    + הוסף שוזר/ת חדש/ה למערכת
-                                </button>
-                            ) : (
-                                <form onSubmit={handleAddStringer} className="text-right space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                                    <h3 className="font-semibold text-gray-800">הוספת שוזר/ת:</h3>
-                                    {addError && <p className="text-red-500 text-sm">{addError}</p>}
-                                    <input
-                                        type="text"
-                                        value={newStringerName}
-                                        onChange={(e) => setNewStringerName(e.target.value)}
-                                        placeholder="שם העובד/ת"
-                                        className="w-full border-gray-300 rounded-lg p-2 border text-sm text-gray-900 bg-white"
-                                        required
-                                    />
-                                    <input
-                                        type="password"
-                                        value={newStringerPassword}
-                                        onChange={(e) => setNewStringerPassword(e.target.value)}
-                                        placeholder="סיסמה"
-                                        className="w-full border-gray-300 rounded-lg p-2 border text-sm text-gray-900 bg-white"
-                                        dir="ltr"
-                                        required
-                                    />
-                                    <div className="flex gap-2">
-                                        <button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm transition">הוסף</button>
-                                        <button type="button" onClick={() => setIsAddingStringer(false)} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 rounded-lg text-sm transition">ביטול</button>
-                                    </div>
-                                </form>
-                            )}
-                        </div>
-
-                        {/* Deactivate Stringer Section */}
-                        <div className="mt-4 text-center">
-                            {!isDeactivatingStringer ? (
-                                <button
-                                    onClick={() => setIsDeactivatingStringer(true)}
-                                    className="text-xs text-gray-400 hover:text-red-500 transition underline decoration-dotted underline-offset-4"
-                                    title="השבת עובד כך שלא יוכל להתחבר יותר"
-                                >
-                                    הפוך שוזר/ת קיימ/ת ללא זמין/ה
-                                </button>
-                            ) : (
-                                <form onSubmit={handleDeactivateStringer} className="text-right space-y-3 bg-red-50 p-4 rounded-xl border border-red-200 mt-2">
-                                    <h3 className="font-semibold text-red-800 text-sm">השבתת שוזר/ת:</h3>
-                                    {deactivateError && <p className="text-red-600 text-xs font-medium">{deactivateError}</p>}
-                                    <select
-                                        value={stringerToDeactivate}
-                                        onChange={(e) => setStringerToDeactivate(e.target.value)}
-                                        className="w-full border-red-300 rounded-lg p-2 border text-sm text-gray-900 bg-white focus:ring-red-500 focus:border-red-500"
-                                        required
+                            <div className="mt-4 pt-4 border-t border-emerald-100 text-center">
+                                {!isAddingStringer ? (
+                                    <button
+                                        onClick={() => setIsAddingStringer(true)}
+                                        className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold py-3 px-4 rounded-xl transition border border-emerald-200 shadow-sm text-sm"
                                     >
-                                        <option value="">-- בחר שוזר/ת --</option>
-                                        {stringers.filter(s => s.name !== "Tomer").map(s => (
-                                            <option key={s.id} value={s.id}>{s.name}</option>
-                                        ))}
-                                    </select>
-                                    <div className="flex gap-2">
-                                        <button type="submit" className="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 rounded-lg text-sm transition">השבת עובד/ת</button>
-                                        <button type="button" onClick={() => setIsDeactivatingStringer(false)} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 rounded-lg text-sm transition">ביטול</button>
-                                    </div>
-                                </form>
-                            )}
+                                        + הוסף שוזר/ת חדש/ה למערכת
+                                    </button>
+                                ) : (
+                                    <form onSubmit={handleAddStringer} className="text-right space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                        <h3 className="font-semibold text-gray-800">הוספת שוזר/ת:</h3>
+                                        {addError && <p className="text-red-500 text-sm">{addError}</p>}
+                                        <input
+                                            type="text"
+                                            value={newStringerName}
+                                            onChange={(e) => setNewStringerName(e.target.value)}
+                                            placeholder="שם העובד/ת"
+                                            className="w-full border-gray-300 rounded-lg p-2 border text-sm text-gray-900 bg-white"
+                                            required
+                                        />
+                                        <input
+                                            type="password"
+                                            value={newStringerPassword}
+                                            onChange={(e) => setNewStringerPassword(e.target.value)}
+                                            placeholder="סיסמה"
+                                            className="w-full border-gray-300 rounded-lg p-2 border text-sm text-gray-900 bg-white"
+                                            dir="ltr"
+                                            required
+                                        />
+                                        <div className="flex gap-2">
+                                            <button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm transition">הוסף</button>
+                                            <button type="button" onClick={() => setIsAddingStringer(false)} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 rounded-lg text-sm transition">ביטול</button>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
+
+                            {/* Deactivate Stringer Section */}
+                            <div className="mt-4 text-center">
+                                {!isDeactivatingStringer ? (
+                                    <button
+                                        onClick={() => setIsDeactivatingStringer(true)}
+                                        className="text-xs text-gray-400 hover:text-red-500 transition underline decoration-dotted underline-offset-4"
+                                        title="השבת עובד כך שלא יוכל להתחבר יותר"
+                                    >
+                                        הפוך שוזר/ת קיימ/ת ללא זמין/ה
+                                    </button>
+                                ) : (
+                                    <form onSubmit={handleDeactivateStringer} className="text-right space-y-3 bg-red-50 p-4 rounded-xl border border-red-200 mt-2">
+                                        <h3 className="font-semibold text-red-800 text-sm">השבתת שוזר/ת:</h3>
+                                        {deactivateError && <p className="text-red-600 text-xs font-medium">{deactivateError}</p>}
+                                        <select
+                                            value={stringerToDeactivate}
+                                            onChange={(e) => setStringerToDeactivate(e.target.value)}
+                                            className="w-full border-red-300 rounded-lg p-2 border text-sm text-gray-900 bg-white focus:ring-red-500 focus:border-red-500"
+                                            required
+                                        >
+                                            <option value="">-- בחר שוזר/ת --</option>
+                                            {stringers.filter(s => s.name !== "Tomer").map(s => (
+                                                <option key={s.id} value={s.id}>{s.name}</option>
+                                            ))}
+                                        </select>
+                                        <div className="flex gap-2">
+                                            <button type="submit" className="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 rounded-lg text-sm transition">השבת עובד/ת</button>
+                                            <button type="button" onClick={() => setIsDeactivatingStringer(false)} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 rounded-lg text-sm transition">ביטול</button>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    </section>
+                </div>
+
+                {/* Material Usage Report - Full Width */}
+                <section className="mt-8">
+                    <MaterialUsageReport />
                 </section>
             </main>
         </>

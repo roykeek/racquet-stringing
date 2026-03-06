@@ -24,15 +24,19 @@
 | Technology | Version | Purpose |
 | --- | --- | --- |
 | Tailwind CSS | 4.x | Utility-first CSS framework |
-| Lucide React | 0.575.0 | Icon library |
 | Heebo (Google Font) | — | Primary font for Hebrew typography |
+
+### Frontend
+
+- **React Hook Form**: Form state management and validation handling
+- **Zod**: TypeScript-first schema declaration and validation (used with React Hook Form)
+- **Lucide React**: Icon library
+- **ExcelJS** & **File Saver**: Added in Phase 3 for client-side generation and export of formatted `.xlsx` Material Usage reports.
 
 ### Forms & Validation
 
 | Technology | Version | Purpose |
 | --- | --- | --- |
-| React Hook Form | 7.71.2 | Performant form handling |
-| Zod | 4.3.6 | Schema validation |
 | @hookform/resolvers | 5.2.2 | Zod ↔ React Hook Form bridge |
 
 ### Security
