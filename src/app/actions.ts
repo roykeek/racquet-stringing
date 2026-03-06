@@ -190,6 +190,13 @@ export async function updateJobStatus(jobId: number, status: string, stringerId?
         if (stringerId) data.stringerId = stringerId;
         if (scheduledDate) data.scheduledDate = scheduledDate;
 
+        if (status === "Completed") {
+            data.completedAt = new Date();
+        } else {
+            // If reverting status from Completed, remove the completedAt timestamp
+            data.completedAt = null;
+        }
+
         await prisma.serviceJob.update({
             where: { id: jobId },
             data
@@ -203,3 +210,74 @@ export async function updateJobStatus(jobId: number, status: string, stringerId?
     }
 }
 
+export type MaterialUsageData = {
+    stringName: string;
+    mainsCount: number;
+    crossesCount: number;
+    totalCount: number;
+};
+
+export async function getMaterialUsageReport(
+    startDate?: Date,
+    endDate?: Date,
+    stringName?: string
+): Promise<MaterialUsageData[]> {
+    const whereClause: any = {
+        status: "Completed",
+    };
+
+    if (startDate || endDate) {
+        whereClause.completedAt = {};
+        if (startDate) whereClause.completedAt.gte = startDate;
+        if (endDate) whereClause.completedAt.lte = endDate;
+    }
+
+    const jobs = await prisma.serviceJob.findMany({
+        where: whereClause,
+        select: {
+            stringMain: true,
+            stringCross: true,
+        },
+    });
+
+    const usageMap = new Map<string, MaterialUsageData>();
+
+    jobs.forEach(job => {
+        // Record mains
+        if (job.stringMain) {
+            if (!usageMap.has(job.stringMain)) usageMap.set(job.stringMain, { stringName: job.stringMain, mainsCount: 0, crossesCount: 0, totalCount: 0 });
+            const entry = usageMap.get(job.stringMain)!;
+            entry.mainsCount++;
+            entry.totalCount++;
+        }
+        // Record crosses
+        if (job.stringCross) {
+            if (!usageMap.has(job.stringCross)) usageMap.set(job.stringCross, { stringName: job.stringCross, mainsCount: 0, crossesCount: 0, totalCount: 0 });
+            const entry = usageMap.get(job.stringCross)!;
+            entry.crossesCount++;
+            entry.totalCount++;
+        }
+    });
+
+    let results = Array.from(usageMap.values());
+
+    if (stringName) {
+        const lowerFilter = stringName.toLowerCase();
+        results = results.filter(r => r.stringName.toLowerCase().includes(lowerFilter));
+    }
+
+    // Sort by total usage descending
+    results.sort((a, b) => b.totalCount - a.totalCount);
+    return results;
+}
+
+export async function getRestockAlerts(threshold: number = 10, daysLookback: number = 30): Promise<{ stringName: string, count: number }[]> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - daysLookback);
+
+    const report = await getMaterialUsageReport(thirtyDaysAgo, new Date());
+
+    return report
+        .filter(item => item.totalCount >= threshold)
+        .map(item => ({ stringName: item.stringName, count: item.totalCount }));
+}

@@ -51,6 +51,7 @@ model ServiceJob {
   stringerId        Int?
   dueDate           DateTime
   scheduledDate     DateTime?
+  completedAt       DateTime?
   createdAt         DateTime      @default(now())
 
   racquetModel RacquetModel? @relation(fields: [modelId], references: [id])

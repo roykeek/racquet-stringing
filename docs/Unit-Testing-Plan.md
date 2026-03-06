@@ -50,6 +50,16 @@ src/
 
 The application relies heavily on Prisma for database access. To keep unit tests fast and deterministic:
 
+### B. Server Actions / DB Interactions
+
+* **Target:** API calls, Prisma inputs, Error Boundaries, Aggregations.
+* **Library:** `jest-mock-extended`
+* **Why:** The API layer is complex and critical. We must ensure:
+  * Form data correctly maps to Prisma fields.
+  * Authentication checks handle failure elegantly (e.g. `bcrypt` validation).
+  * Material usage aggregation (`getMaterialUsageReport` and `getRestockAlerts`) correctly counts and filters string logs.
+* **Reference:** See `docs/API-DB-Mocking-Plan.md` for full implementation details.
+
 1. **Never** connect to the real SQLite/LibSQL database during unit tests.
 2. Use `jest-mock-extended` to create a globally accessible mock of the Prisma client.
 3. Inject this mock during tests to simulate specific database returns.
