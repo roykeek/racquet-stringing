@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronDown } from "lucide-react";
 
-export interface SelectOption {
+interface SelectOption {
     id: string | number;
     name: string;
 }
