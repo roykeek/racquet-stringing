@@ -146,8 +146,8 @@ export default function CustomSelect({
                     <li>
                         <button
                             type="button"
-                            className={`w-full text-right px-4 py-2.5 text-sm transition-colors
-                                ${focusedIndex === 0 ? "bg-gray-100 text-gray-700" : "text-gray-500 hover:bg-gray-50"}
+                            className={`w-full text-right px-4 py-2.5 text-sm transition-colors border-l-4
+                                ${focusedIndex === 0 ? "bg-blue-100 text-blue-900 border-blue-500" : "border-transparent text-gray-500 hover:bg-gray-50"}
                             `}
                             onClick={() => handleSelect("")}
                             tabIndex={-1}
@@ -163,9 +163,11 @@ export default function CustomSelect({
                             <li key={option.id}>
                                 <button
                                     type="button"
-                                    className={`w-full text-right px-4 py-2.5 text-sm transition-colors
-                                        ${isSelected ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:bg-blue-50 hover:text-blue-700"}
-                                        ${isFocused && !isSelected ? "bg-gray-100" : ""}
+                                    className={`w-full text-right px-4 py-2.5 text-sm transition-colors border-l-4
+                                        ${isSelected ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:text-blue-700"}
+                                        ${isFocused && !isSelected ? "bg-blue-100 text-blue-900 border-blue-500" : "border-transparent"}
+                                        ${isSelected && isFocused ? "border-blue-700 bg-blue-200" : ""}
+                                        ${!isFocused && !isSelected ? "hover:bg-blue-50" : ""}
                                     `}
                                     onClick={() => handleSelect(option.id)}
                                     tabIndex={-1}
