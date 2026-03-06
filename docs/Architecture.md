@@ -37,7 +37,10 @@ src/
 ├── components/
 │   ├── BookingForm.tsx           # Client booking form
 │   ├── DashboardWrapper.tsx      # Stringer dashboard (3-column)
+│   ├── ExcelExportButton.tsx     # Phase 3: Client-side .xlsx export via exceljs
+│   ├── MaterialUsageReport.tsx   # Phase 3: Reporting & date filtering
 │   ├── RacquetHistoryChips.tsx   # Phase 2: phone lookup chips
+│   ├── RestockAlerts.tsx         # Phase 3: Low-stock warnings
 │   ├── StringAutocomplete.tsx    # Autocomplete for string selection
 │   ├── StringerLoginForm.tsx     # Stringer login
 │   └── StickyWelcomeBanner.tsx   # Welcome overlay
@@ -78,6 +81,7 @@ prisma/
                                           │ stringerId FK?│
                                           │ dueDate       │
                                           │ scheduledDate?│
+                                          │ completedAt  ?│
                                           │ createdAt     │
                                           └──────────────┘
 ```
