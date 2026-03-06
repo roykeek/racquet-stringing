@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { format, addDays } from "date-fns";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,8 @@ import { Manufacturer, RacquetModel } from "@prisma/client";
 import { loadPersistedData, savePersistedData } from "@/hooks/usePersistedState";
 import RacquetHistoryChips, { RacquetChip } from "@/components/RacquetHistoryChips";
 import StringAutocomplete from "@/components/StringAutocomplete";
+import CustomSelect from "@/components/CustomSelect";
+import CustomDatePicker from "@/components/CustomDatePicker";
 
 import { bookingSchema, BookingFormValues } from "@/lib/validations";
 import { formatDate } from "@/lib/dateUtils";
@@ -28,6 +30,7 @@ export default function BookingForm({
 
     const {
         register,
+        control,
         handleSubmit,
         watch,
         reset,
@@ -264,17 +267,19 @@ export default function BookingForm({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">יצרן מחבט</label>
-                        <select
-                            {...register("manufacturerId")}
-                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white text-gray-900"
-                        >
-                            <option value="">-- בחר יצרן --</option>
-                            {initialManufacturers.map((m) => (
-                                <option key={m.id} value={m.id}>
-                                    {m.name}
-                                </option>
-                            ))}
-                        </select>
+                        <Controller
+                            name="manufacturerId"
+                            control={control}
+                            render={({ field }) => (
+                                <CustomSelect
+                                    options={initialManufacturers.map(m => ({ id: m.id, name: m.name }))}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="-- בחר יצרן --"
+                                    error={!!errors.manufacturerId}
+                                />
+                            )}
+                        />
                         {errors.manufacturerId && (
                             <p className="mt-1 text-sm text-red-600">{errors.manufacturerId.message}</p>
                         )}
@@ -283,18 +288,19 @@ export default function BookingForm({
                     {!isOtherManufacturer && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">דגם מחבט</label>
-                            <select
-                                {...register("modelId")}
-                                disabled={models.length === 0}
-                                className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white text-gray-900 disabled:bg-gray-100 disabled:text-gray-500"
-                            >
-                                <option value="">-- בחר דגם --</option>
-                                {models.map((m) => (
-                                    <option key={m.id} value={m.id}>
-                                        {m.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <Controller
+                                name="modelId"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomSelect
+                                        options={models.map(m => ({ id: m.id, name: m.name }))}
+                                        value={field.value ?? ""}
+                                        onChange={field.onChange}
+                                        placeholder="-- בחר דגם --"
+                                        disabled={models.length === 0}
+                                    />
+                                )}
+                            />
                         </div>
                     )}
                 </div>
@@ -388,18 +394,27 @@ export default function BookingForm({
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            תאריך איסוף מבוקש (DD/MM/YYYY)
-                        </label>
-                        <input
-                            {...register("dueDate")}
-                            type="date"
-                            className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-gray-900 bg-white"
+                        <label className="block text-sm font-medium text-gray-700 mb-1">ת. איסוף מבוקש</label>
+                        <Controller
+                            name="dueDate"
+                            control={control}
+                            render={({ field }) => (
+                                <CustomDatePicker
+                                    selected={field.value ? new Date(field.value) : null}
+                                    onChange={(date) => {
+                                        if (date) {
+                                            field.onChange(format(date, 'yyyy-MM-dd'));
+                                        } else {
+                                            field.onChange('');
+                                        }
+                                    }}
+                                    minDate={new Date()} // Can't request pickup in the past
+                                    error={!!errors.dueDate}
+                                />
+                            )}
                         />
-                        {watch("dueDate") && (
-                            <span className="text-[10px] text-blue-600 mt-1 block">
-                                {formatDate(watch("dueDate"))}
-                            </span>
+                        {errors.dueDate && (
+                            <p className="mt-1 text-sm text-red-600">{errors.dueDate.message}</p>
                         )}
                     </div>
                 </div>

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { getMaterialUsageReport, MaterialUsageData } from "@/app/actions";
+import { format } from "date-fns";
+import CustomDatePicker from "./CustomDatePicker";
 import { formatDate } from "@/lib/dateUtils";
 
 export default function MaterialUsageReport() {
@@ -42,26 +44,31 @@ export default function MaterialUsageReport() {
             </h2>
 
             <div className="flex flex-col md:flex-row gap-4 mb-6 bg-emerald-50 p-4 rounded-lg border border-emerald-100 items-end">
-                <div className="flex flex-col">
-                    <label className="text-xs text-emerald-800 font-medium mb-1">
-                        מתאריך (DD/MM/YYYY)
-                    </label>
-                    <input
-                        type="date"
-                        value={startDate}
-                        onChange={e => setStartDate(e.target.value)}
-                        className="border-emerald-200 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white h-[42px]"
+                <div className="flex-1 min-w-[130px]">
+                    <label className="text-xs text-emerald-800 font-medium mb-1">מתאריך</label>
+                    <CustomDatePicker
+                        selected={startDate ? new Date(startDate) : null}
+                        onChange={(date) => {
+                            if (date) setStartDate(format(date, 'yyyy-MM-dd'));
+                            else setStartDate("");
+                        }}
+                        placeholderText="DD/MM/YYYY"
+                        className="text-sm h-[42px]"
+                        maxDate={endDate ? new Date(endDate) : undefined}
                     />
                 </div>
-                <div className="flex flex-col">
-                    <label className="text-xs text-emerald-800 font-medium mb-1">
-                        עד תאריך (DD/MM/YYYY)
-                    </label>
-                    <input
-                        type="date"
-                        value={endDate}
-                        onChange={e => setEndDate(e.target.value)}
-                        className="border-emerald-200 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white h-[42px]"
+
+                <div className="flex-1 min-w-[130px]">
+                    <label className="text-xs text-emerald-800 font-medium mb-1">עד תאריך</label>
+                    <CustomDatePicker
+                        selected={endDate ? new Date(endDate) : null}
+                        onChange={(date) => {
+                            if (date) setEndDate(format(date, 'yyyy-MM-dd'));
+                            else setEndDate("");
+                        }}
+                        placeholderText="DD/MM/YYYY"
+                        className="text-sm h-[42px]"
+                        minDate={startDate ? new Date(startDate) : undefined}
                     />
                 </div>
                 <div className="flex-grow flex flex-col">

@@ -4,6 +4,8 @@ import { useState } from "react";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { Download, Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import CustomDatePicker from "./CustomDatePicker";
 import { getJobsForExport } from "@/app/actions";
 import { formatDate } from "@/lib/dateUtils";
 
@@ -64,7 +66,7 @@ export default function ExcelExportButton() {
                     id: job.trackingUUID.substring(0, 8), // Show short UUID instead of DB ID
                     clientName: job.clientName,
                     phone: job.clientPhone,
-                    racquetModel: job.racquetModel ? `${job.racquetModel.manufacturer.name} ${job.racquetModel.name}` : "Unknown",
+                    racquetModel: job.racquetModel ? `${job.racquetModel.manufacturer.name} ${job.racquetModel.name} ` : "Unknown",
                     stringMains: job.stringMain || "N/A",
                     mainsTension: job.mainsTensionLbs ? Number(job.mainsTensionLbs) : "",
                     stringCrosses: job.stringCross || "N/A",
@@ -94,30 +96,24 @@ export default function ExcelExportButton() {
 
     return (
         <div className="flex flex-col sm:flex-row items-end gap-3 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-            <div className="flex flex-col">
-                <label className="text-xs text-gray-500 font-medium mb-1">
-                    מתאריך (DD/MM/YYYY)
-                </label>
-                <input
-                    type="date"
-                    value={startDate}
-                    min={twoYearsAgoStr}
-                    max={endDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="border-gray-300 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50 h-[42px]"
+            <div className="flex flex-col flex-1 min-w-[130px]">
+                <label className="text-xs text-emerald-800 font-medium mb-1 shrink-0">מתאריך</label>
+                <CustomDatePicker
+                    selected={startDate ? new Date(startDate) : null}
+                    onChange={(date) => setStartDate(date ? format(date, 'yyyy-MM-dd') : "")}
+                    placeholderText="DD/MM/YYYY"
+                    className="text-sm h-[42px]"
+                    maxDate={endDate ? new Date(endDate) : undefined}
                 />
             </div>
-            <div className="flex flex-col">
-                <label className="text-xs text-gray-500 font-medium mb-1">
-                    עד תאריך (DD/MM/YYYY)
-                </label>
-                <input
-                    type="date"
-                    value={endDate}
-                    min={startDate}
-                    max={todayStr}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="border-gray-300 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50 h-[42px]"
+            <div className="flex flex-col flex-1 min-w-[130px]">
+                <label className="text-xs text-emerald-800 font-medium mb-1 shrink-0">עד תאריך</label>
+                <CustomDatePicker
+                    selected={endDate ? new Date(endDate) : null}
+                    onChange={(date) => setEndDate(date ? format(date, 'yyyy-MM-dd') : "")}
+                    placeholderText="DD/MM/YYYY"
+                    className="text-sm h-[42px]"
+                    minDate={startDate ? new Date(startDate) : undefined}
                 />
             </div>
             <button
