@@ -43,24 +43,26 @@ export default function MaterialUsageReport() {
 
             <div className="flex flex-col md:flex-row gap-4 mb-6 bg-emerald-50 p-4 rounded-lg border border-emerald-100 items-end">
                 <div className="flex flex-col">
-                    <label className="text-xs text-emerald-800 font-medium mb-1">מתאריך</label>
+                    <label className="text-xs text-emerald-800 font-medium mb-1">
+                        מתאריך (DD/MM/YYYY)
+                    </label>
                     <input
                         type="date"
                         value={startDate}
                         onChange={e => setStartDate(e.target.value)}
-                        className="border-emerald-200 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white"
+                        className="border-emerald-200 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white h-[42px]"
                     />
-                    {startDate && <span className="text-[10px] text-emerald-600 mt-1">{formatDate(startDate)}</span>}
                 </div>
                 <div className="flex flex-col">
-                    <label className="text-xs text-emerald-800 font-medium mb-1">עד תאריך</label>
+                    <label className="text-xs text-emerald-800 font-medium mb-1">
+                        עד תאריך (DD/MM/YYYY)
+                    </label>
                     <input
                         type="date"
                         value={endDate}
                         onChange={e => setEndDate(e.target.value)}
-                        className="border-emerald-200 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white"
+                        className="border-emerald-200 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white h-[42px]"
                     />
-                    {endDate && <span className="text-[10px] text-emerald-600 mt-1">{formatDate(endDate)}</span>}
                 </div>
                 <div className="flex-grow flex flex-col">
                     <label className="text-xs text-emerald-800 font-medium mb-1">חיפוש גיד ספציפי</label>
@@ -69,16 +71,16 @@ export default function MaterialUsageReport() {
                         placeholder="למשל: RPM Blast..."
                         value={filterString}
                         onChange={e => setFilterString(e.target.value)}
-                        className="p-2 border border-emerald-200 rounded-lg w-full focus:border-emerald-500 focus:ring-emerald-500 bg-white text-sm"
+                        className="p-2 border border-emerald-200 rounded-lg w-full focus:border-emerald-500 focus:ring-emerald-500 bg-white text-sm h-[42px]"
                         dir="ltr"
                     />
                 </div>
                 <div>
                     <button
                         onClick={() => { setStartDate(""); setEndDate(""); setFilterString(""); }}
-                        className="p-2 text-sm text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors font-medium border border-transparent"
+                        className="px-3 text-sm text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors font-medium border border-transparent h-[42px] whitespace-nowrap"
                     >
-                        נקה סינון
+                        נקה סינונים
                     </button>
                 </div>
             </div>

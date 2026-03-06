@@ -388,7 +388,9 @@ export default function BookingForm({
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">תאריך איסוף מבוקש</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            תאריך איסוף מבוקש (DD/MM/YYYY)
+                        </label>
                         <input
                             {...register("dueDate")}
                             type="date"

@@ -10,7 +10,7 @@ export default async function Home() {
     <div className="w-full flex flex-col items-center pt-8 pb-16 px-8">
       <main className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Client Card */}
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col space-y-6 transform transition hover:scale-105" dir="rtl">
+        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col space-y-6 transition-colors hover:border-blue-200" dir="rtl">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 shrink-0">
               <svg

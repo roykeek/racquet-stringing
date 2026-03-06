@@ -95,33 +95,35 @@ export default function ExcelExportButton() {
     return (
         <div className="flex flex-col sm:flex-row items-end gap-3 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
             <div className="flex flex-col">
-                <label className="text-xs text-gray-500 font-medium mb-1">מתאריך</label>
+                <label className="text-xs text-gray-500 font-medium mb-1">
+                    מתאריך (DD/MM/YYYY)
+                </label>
                 <input
                     type="date"
                     value={startDate}
                     min={twoYearsAgoStr}
                     max={endDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="border-gray-300 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50 max-h-[38px]"
+                    className="border-gray-300 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50 h-[42px]"
                 />
-                {startDate && <span className="text-[10px] text-emerald-600 mt-1">{formatDate(startDate)}</span>}
             </div>
             <div className="flex flex-col">
-                <label className="text-xs text-gray-500 font-medium mb-1">עד תאריך</label>
+                <label className="text-xs text-gray-500 font-medium mb-1">
+                    עד תאריך (DD/MM/YYYY)
+                </label>
                 <input
                     type="date"
                     value={endDate}
                     min={startDate}
                     max={todayStr}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="border-gray-300 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50 max-h-[38px]"
+                    className="border-gray-300 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50 h-[42px]"
                 />
-                {endDate && <span className="text-[10px] text-emerald-600 mt-1">{formatDate(endDate)}</span>}
             </div>
             <button
                 onClick={exportToExcel}
                 disabled={isExporting}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium h-[38px] disabled:bg-emerald-400"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium h-[42px] disabled:bg-emerald-400"
             >
                 {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                 {isExporting ? "מייצא..." : "Export to Excel"}
