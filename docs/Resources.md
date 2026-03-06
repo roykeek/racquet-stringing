@@ -32,6 +32,8 @@
 - **Zod**: TypeScript-first schema declaration and validation (used with React Hook Form)
 - **Lucide React**: Icon library
 - **ExcelJS** & **File Saver**: Added in Phase 3 for client-side generation and export of formatted `.xlsx` Material Usage reports.
+- **react-datepicker**: Replaces native `<input type="date">` to fix Chromium RTL styling bugs on Windows.
+- **date-fns**: Locale formatting (Hebrew) for custom components.
 
 ### Forms & Validation
 

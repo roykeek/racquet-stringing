@@ -35,7 +35,9 @@ src/
 │   ├── page.tsx                  # Landing page (role selector)
 │   └── globals.css
 ├── components/
-│   ├── BookingForm.tsx           # Client booking form
+│   ├── BookingForm.tsx           # Client booking form (uses CustomSelect & CustomDatePicker)
+│   ├── CustomDatePicker.tsx      # System-wide date picker (bypasses Chromium RTL bugs)
+│   ├── CustomSelect.tsx          # System-wide dropdown (bypasses Chromium RTL bugs)
 │   ├── DashboardWrapper.tsx      # Stringer dashboard (3-column)
 │   ├── ExcelExportButton.tsx     # Phase 3: Client-side .xlsx export via exceljs
 │   ├── MaterialUsageReport.tsx   # Phase 3: Reporting & date filtering

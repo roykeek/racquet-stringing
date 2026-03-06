@@ -13,7 +13,7 @@
 * **Responsiveness:** Fully functional on Desktop, Tablet, and Mobile (Android/iOS).
 * **Measurement Standard:**
   * Tension: **Lbs (Pounds)**.
-  * Dates: DD/MM/YYYY.
+  * Dates: DD/MM/YYYY (enforced globally via `react-datepicker`).
 * **Platform Strategy:** Progressive Web App (PWA) recommended for mobile "add to home screen" capability and offline caching.
 
 ---
@@ -85,8 +85,8 @@
 
 1. **Full Name:** Text Input.
 2. **Phone Number:** Tel Input (Mobile: Numeric keypad. Must be `dir="ltr"`).
-3. **Manufacturer:** Dropdown (Selects from DB). Includes "Other".
-4. **Racquet Model:** Dynamic Dropdown (Loads models based on Manufacturer selection). Includes "Other".
+3. **Manufacturer:** Custom Dropdown (`CustomSelect.tsx`). Includes "Other".
+4. **Racquet Model:** Dynamic Custom Dropdown (`CustomSelect.tsx`). Loads models based on Manufacturer selection. Includes "Other".
     * *Dynamic Logic:* If "Other" is selected in either, show a free-text input for brand/model.
 5. **String Type (Mains & Crosses):** Two autocomplete inputs powered by a static JSON list of ~30 popular strings. Custom entry allowed for unlisted strings.
 6. **Tension (Lbs):**
