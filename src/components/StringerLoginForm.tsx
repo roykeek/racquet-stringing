@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginStringer } from "@/app/actions";
@@ -14,6 +14,7 @@ type StringerOption = {
 };
 
 import { loginSchema, LoginFormValues } from "@/lib/validations";
+import CustomSelect from "@/components/CustomSelect";
 
 export default function StringerLoginForm({
     stringers,
@@ -26,6 +27,7 @@ export default function StringerLoginForm({
 
     const {
         register,
+        control,
         handleSubmit,
         reset,
         setFocus,
@@ -64,26 +66,24 @@ export default function StringerLoginForm({
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">שם שוזר/ת</label>
                 <div className="relative">
-                    <select
-                        {...register("stringerId", {
-                            onChange: (e) => {
-                                if (e.target.value) {
-                                    setFocus("password");
-                                }
-                            }
-                        })}
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-3 pr-10 border bg-white appearance-none text-gray-900"
-                    >
-                        <option value="">-- בחר עובד --</option>
-                        {stringers.map((s) => (
-                            <option key={s.id} value={s.id}>
-                                {s.name}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
-                        <Wrench size={18} />
-                    </div>
+                    <Controller
+                        name="stringerId"
+                        control={control}
+                        render={({ field }) => (
+                            <CustomSelect
+                                options={stringers}
+                                value={field.value}
+                                onChange={(val) => {
+                                    field.onChange(val);
+                                    if (val) setFocus("password");
+                                }}
+                                placeholder="-- בחר עובד --"
+                                error={!!errors.stringerId}
+                                className="w-full text-base"
+                                icon={<Wrench size={18} />}
+                            />
+                        )}
+                    />
                 </div>
                 {errors.stringerId && (
                     <p className="mt-1 text-sm text-red-600">{errors.stringerId.message}</p>

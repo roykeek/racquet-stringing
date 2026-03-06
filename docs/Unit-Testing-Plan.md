@@ -35,6 +35,10 @@ Testing stateful logic that is isolated from the UI using `@testing-library/reac
 
 Testing functions that handle formatting, data transformation, or calculations.
 
+### D. Frontend Components (Future Scope)
+
+Currently, React component rendering (e.g., `CustomDatePicker.tsx`, `CustomSelect.tsx`) and DOM interaction tests are **out of scope**. If RTL (React Testing Library) tests are added in the future, they must mock user click events on these specific custom DOM nodes rather than native HTML5 elements.
+
 ## 4. Folder Structure & Colocation
 
 Test files will follow a colocation strategy, typically appending `.test.ts` or `.test.tsx` to the target file's name in the same directory, or placing them in a `__tests__` folder if required.
