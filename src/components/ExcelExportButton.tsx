@@ -5,6 +5,7 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { Download, Loader2 } from "lucide-react";
 import { getJobsForExport } from "@/app/actions";
+import { formatDate } from "@/lib/dateUtils";
 
 export default function ExcelExportButton() {
     // Default to last 30 days
@@ -68,17 +69,21 @@ export default function ExcelExportButton() {
                     mainsTension: job.mainsTensionLbs ? Number(job.mainsTensionLbs) : "",
                     stringCrosses: job.stringCross || "N/A",
                     crossesTension: job.crossTensionLbs ? Number(job.crossTensionLbs) : "",
-                    completedDate: job.completedAt ? new Date(job.completedAt).toLocaleDateString() : (job.status === "Completed" ? "Completed (No Date)" : "N/A"),
+                    completedDate: job.completedAt ? formatDate(job.completedAt) : (job.status === "Completed" ? "Completed (No Date)" : "N/A"),
                     stringerName: job.stringer?.name || "Unassigned",
                     status: job.status,
-                    createdAt: new Date(job.createdAt).toLocaleDateString()
+                    createdAt: formatDate(job.createdAt)
                 });
             });
 
             // Generate Buffer and Trigger Download
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-            saveAs(blob, `Racquet_Stringing_Jobs_${startDate}_to_${endDate}.xlsx`);
+
+            const startFmt = formatDate(startDate).replace(/\//g, "-");
+            const endFmt = formatDate(endDate).replace(/\//g, "-");
+
+            saveAs(blob, `Racquet_Stringing_Jobs_${startFmt}_to_${endFmt}.xlsx`);
         } catch (error) {
             console.error("Export failed", error);
             alert("שגיאה בייצוא הנתונים.");
@@ -99,6 +104,7 @@ export default function ExcelExportButton() {
                     onChange={(e) => setStartDate(e.target.value)}
                     className="border-gray-300 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50 max-h-[38px]"
                 />
+                {startDate && <span className="text-[10px] text-emerald-600 mt-1">{formatDate(startDate)}</span>}
             </div>
             <div className="flex flex-col">
                 <label className="text-xs text-gray-500 font-medium mb-1">עד תאריך</label>
@@ -110,6 +116,7 @@ export default function ExcelExportButton() {
                     onChange={(e) => setEndDate(e.target.value)}
                     className="border-gray-300 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-gray-50 max-h-[38px]"
                 />
+                {endDate && <span className="text-[10px] text-emerald-600 mt-1">{formatDate(endDate)}</span>}
             </div>
             <button
                 onClick={exportToExcel}

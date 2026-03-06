@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Wrench, LogOut, Phone, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { addStringer, logoutStringer, updateJobStatus, deactivateStringer } from "@/app/actions";
+import { formatDate } from "@/lib/dateUtils";
 import ExcelExportButton from "./ExcelExportButton";
 import RestockAlerts from "./RestockAlerts";
 import MaterialUsageReport from "./MaterialUsageReport";
@@ -198,7 +199,7 @@ export default function DashboardWrapper({
                                     completedJobs.slice(0, 5).map((job) => (
                                         <div key={job.id} className="p-3 bg-gray-50 border border-gray-100 rounded-lg flex justify-between items-center opacity-70">
                                             <span className="font-medium text-gray-700 text-sm">{job.clientName}</span>
-                                            <span className="text-xs text-gray-500">{new Date(job.createdAt).toLocaleDateString("he-IL")}</span>
+                                            <span className="text-xs text-gray-500">{formatDate(job.createdAt)}</span>
                                         </div>
                                     ))
                                 )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getMaterialUsageReport, MaterialUsageData } from "@/app/actions";
+import { formatDate } from "@/lib/dateUtils";
 
 export default function MaterialUsageReport() {
     const [data, setData] = useState<MaterialUsageData[]>([]);
@@ -49,6 +50,7 @@ export default function MaterialUsageReport() {
                         onChange={e => setStartDate(e.target.value)}
                         className="border-emerald-200 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white"
                     />
+                    {startDate && <span className="text-[10px] text-emerald-600 mt-1">{formatDate(startDate)}</span>}
                 </div>
                 <div className="flex flex-col">
                     <label className="text-xs text-emerald-800 font-medium mb-1">עד תאריך</label>
@@ -58,6 +60,7 @@ export default function MaterialUsageReport() {
                         onChange={e => setEndDate(e.target.value)}
                         className="border-emerald-200 rounded-lg p-2 border text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white"
                     />
+                    {endDate && <span className="text-[10px] text-emerald-600 mt-1">{formatDate(endDate)}</span>}
                 </div>
                 <div className="flex-grow flex flex-col">
                     <label className="text-xs text-emerald-800 font-medium mb-1">חיפוש גיד ספציפי</label>
