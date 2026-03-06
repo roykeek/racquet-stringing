@@ -31,7 +31,7 @@
 - **React Hook Form**: Form state management and validation handling
 - **Zod**: TypeScript-first schema declaration and validation (used with React Hook Form)
 - **Lucide React**: Icon library
-- **SheetJS (`xlsx`)**: Added in Phase 3 for client-side generation and export of `.xlsx` Material Usage reports.
+- **ExcelJS** & **File Saver**: Added in Phase 3 for client-side generation and export of formatted `.xlsx` Material Usage reports.
 
 ### Forms & Validation
 

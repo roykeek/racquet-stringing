@@ -20,7 +20,7 @@ This document serves as a living repository for ideas, features, and improvement
 
 - [x] **Material Usage Report:** Query `stringMain`/`stringCross` across completed jobs to show how many times each string was used in a given period. Filterable by date range and string name.
 - [x] **Restock Alerts:** Surface insights like "You used RPM Blast in 15 jobs last month — time to restock?"
-- [x] **Excel Export:** Export job data and material usage reports to `.xlsx` using SheetJS (`xlsx` package). Client-side generation, no server dependency.
+- [x] **Excel Export:** Export job data and material usage reports to `.xlsx` using `exceljs` and `file-saver`. Client-side generation, no server dependency.
 
 ## 🛠️ Technical Debt & Refactoring
 
