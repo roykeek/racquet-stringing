@@ -296,7 +296,7 @@ export async function getJobsForExport(startDate: Date, endDate: Date) {
     const endOfDay = new Date(endDate);
     endOfDay.setHours(23, 59, 59, 999);
 
-    return prisma.serviceJob.findMany({
+    const jobs = await prisma.serviceJob.findMany({
         where: {
             createdAt: {
                 gte: startDate,
@@ -315,4 +315,10 @@ export async function getJobsForExport(startDate: Date, endDate: Date) {
             createdAt: "desc"
         }
     });
+
+    return jobs.map(job => ({
+        ...job,
+        mainsTensionLbs: job.mainsTensionLbs ? Number(job.mainsTensionLbs) : null,
+        crossTensionLbs: job.crossTensionLbs ? Number(job.crossTensionLbs) : null,
+    }));
 }
