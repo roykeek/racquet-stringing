@@ -220,7 +220,7 @@ export default function BookingForm({
                     >✕</button>
                 </div>
             )}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
                 {/* 1. Client Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -346,10 +346,15 @@ export default function BookingForm({
                         <input
                             {...register("mainsTensionLbs")}
                             type="number"
+                            min="30"
+                            max="70"
                             dir="ltr"
-                            className={`w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left bg-white ${watch("mainsTensionLbs") === "52" ? "text-gray-400" : "text-gray-900"}`}
+                            className={`w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left bg-white ${watch("mainsTensionLbs") === "52" ? "text-gray-400" : "text-gray-900"} ${errors.mainsTensionLbs ? "border-red-500 focus:ring-red-500" : ""}`}
                             placeholder="52"
                         />
+                        {errors.mainsTensionLbs && (
+                            <p className="mt-1 text-sm text-red-600">{errors.mainsTensionLbs.message}</p>
+                        )}
                     </div>
 
                     <div>
@@ -359,10 +364,15 @@ export default function BookingForm({
                         <input
                             {...register("crossTensionLbs")}
                             type="number"
+                            min="30"
+                            max="70"
                             dir="ltr"
-                            className={`w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left bg-white ${watch("crossTensionLbs") === "51" ? "text-gray-400" : "text-gray-900"}`}
-                            placeholder="52"
+                            className={`w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border text-left bg-white ${watch("crossTensionLbs") === "51" ? "text-gray-400" : "text-gray-900"} ${errors.crossTensionLbs ? "border-red-500 focus:ring-red-500" : ""}`}
+                            placeholder="51"
                         />
+                        {errors.crossTensionLbs && (
+                            <p className="mt-1 text-sm text-red-600">{errors.crossTensionLbs.message}</p>
+                        )}
                     </div>
                 </div>
 
