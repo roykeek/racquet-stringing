@@ -181,7 +181,23 @@ export default function DashboardWrapper({
                                         <JobCard
                                             key={job.id}
                                             job={job}
-                                            onAction={() => handleStatusChange(job.id, "Completed", currentUser.id)}
+                                            onAction={() => {
+                                                handleStatusChange(job.id, "Completed", currentUser.id);
+
+                                                // Option 3: Click-to-Chat WhatsApp Trigger
+                                                if (job.clientPhone) {
+                                                    const cleanPhone = job.clientPhone.replace(/\D/g, "");
+                                                    // Optional: If Israeli number starts with 0, replace with 972
+                                                    const formattedPhone = cleanPhone.startsWith("0")
+                                                        ? `972${cleanPhone.substring(1)}`
+                                                        : cleanPhone;
+
+                                                    const message = `היי ${job.clientName}, המחבט שלך מוכן לאיסוף! 🎾`;
+                                                    const waLink = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+
+                                                    window.open(waLink, "_blank");
+                                                }
+                                            }}
                                             actionText="סיים עבודה"
                                             onSecondaryAction={() => handleStatusChange(job.id, "Scheduled", currentUser.id)}
                                             secondaryActionText="החזר ליומן"
