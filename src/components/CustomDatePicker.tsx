@@ -20,7 +20,7 @@ interface CustomDatePickerProps {
     disabled?: boolean;
 }
 
-export const CustomDatePicker = forwardRef<DatePicker, CustomDatePickerProps>(
+const CustomDatePicker = forwardRef<DatePicker, CustomDatePickerProps>(
     (
         {
             selected,

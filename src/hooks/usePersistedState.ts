@@ -11,7 +11,7 @@
 
 const STORAGE_KEY = "racquet_booking_v3";
 
-export interface PersistedBookingData {
+interface PersistedBookingData {
     /** Schema version — bump when field shape changes to auto-clear stale data */
     version: 3;
     clientName: string;
