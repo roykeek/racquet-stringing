@@ -68,7 +68,16 @@ export default function StringAutocomplete({
     // Select an option from the dropdown
     const handleSelect = useCallback(
         (option: StringOption) => {
-            onChange(`${option.brand} ${option.name}`);
+            const fullName = `${option.brand} ${option.name}`;
+            // Update ref immediately — blur timer may fire before React re-renders,
+            // so we can't rely solely on the useEffect to keep valueRef in sync.
+            valueRef.current = fullName;
+            // Cancel any pending blur validation — we're selecting a valid option.
+            if (blurTimerRef.current !== null) {
+                clearTimeout(blurTimerRef.current);
+                blurTimerRef.current = null;
+            }
+            onChange(fullName);
             setIsOpen(false);
             setActiveIndex(-1);
             inputRef.current?.blur();
