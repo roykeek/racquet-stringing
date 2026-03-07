@@ -21,11 +21,11 @@ export default function ExcelExportButton() {
     const exportToExcel = async () => {
         setIsExporting(true);
         try {
-            const startStr = new Date(startDate);
-            const endStr = new Date(endDate);
+            const parsedStart = new Date(startDate);
+            const parsedEnd = new Date(endDate);
 
             // Fetch exactly the narrowed dataset instead of using `allJobs`
-            const jobs = await getJobsForExport(startStr, endStr);
+            const jobs = await getJobsForExport(parsedStart, parsedEnd);
 
             if (jobs.length === 0) {
                 alert("לא נמצאו עבודות בטווח התאריכים הנבחר.");
