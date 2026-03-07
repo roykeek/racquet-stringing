@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/dateUtils";
 export default function MaterialUsageReport() {
     const [data, setData] = useState<MaterialUsageData[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const [startDate, setStartDate] = useState<string>("");
     const [endDate, setEndDate] = useState<string>("");
@@ -17,16 +18,22 @@ export default function MaterialUsageReport() {
     useEffect(() => {
         async function loadReport() {
             setLoading(true);
-            const start = startDate ? new Date(startDate) : undefined;
-            const end = endDate ? new Date(endDate) : undefined;
-            // Adjust end date to include the whole day if selected
-            if (end) {
-                end.setHours(23, 59, 59, 999);
-            }
+            setError(null);
+            try {
+                const start = startDate ? new Date(startDate) : undefined;
+                const end = endDate ? new Date(endDate) : undefined;
+                // Adjust end date to include the whole day if selected
+                if (end) {
+                    end.setHours(23, 59, 59, 999);
+                }
 
-            const report = await getMaterialUsageReport(start, end, filterString);
-            setData(report);
-            setLoading(false);
+                const report = await getMaterialUsageReport(start, end, filterString);
+                setData(report);
+            } catch {
+                setError("שגיאה בטעינת הדוח. אנא נסה שוב.");
+            } finally {
+                setLoading(false);
+            }
         }
 
         // Debounce fetching slightly when typing
@@ -94,6 +101,8 @@ export default function MaterialUsageReport() {
 
             {loading ? (
                 <div className="text-center py-8 text-emerald-600 font-medium">טוען נתונים...</div>
+            ) : error ? (
+                <div className="text-center py-8 text-red-600 font-medium">{error}</div>
             ) : data.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">לא נמצאו נתוני שימוש בגידים בתקופה זו.</div>
             ) : (
