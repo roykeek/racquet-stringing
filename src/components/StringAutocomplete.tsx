@@ -34,6 +34,7 @@ export default function StringAutocomplete({
     const [filteredOptions, setFilteredOptions] = useState<StringOption[]>([]);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Filter options based on input value
     const handleInputChange = useCallback(
@@ -41,8 +42,8 @@ export default function StringAutocomplete({
             onChange(inputValue);
 
             if (inputValue.trim().length === 0) {
-                setFilteredOptions(allStrings);
-                setIsOpen(true);
+                setFilteredOptions([]);
+                setIsOpen(false);
                 return;
             }
 
@@ -79,25 +80,22 @@ export default function StringAutocomplete({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Show all options when focusing on an empty input
+    // Show filtered options on focus; do nothing on empty input
     const handleFocus = () => {
-        if (value.trim().length === 0) {
-            setFilteredOptions(allStrings);
-        } else {
-            const query = value.toLowerCase();
-            setFilteredOptions(
-                allStrings.filter((s) =>
-                    `${s.brand} ${s.name}`.toLowerCase().includes(query)
-                )
-            );
-        }
+        if (value.trim().length === 0) return;
+        const query = value.toLowerCase();
+        setFilteredOptions(
+            allStrings.filter((s) =>
+                `${s.brand} ${s.name}`.toLowerCase().includes(query)
+            )
+        );
         setIsOpen(true);
     };
 
     // Clear invalid input on blur (e.g. partial search terms like "Rz")
     const handleBlur = useCallback(() => {
         // Small delay so dropdown click registers before blur clears the value
-        setTimeout(() => {
+        blurTimerRef.current = setTimeout(() => {
             const trimmed = value.trim();
             if (trimmed.length === 0) return;
             const isValid = allStrings.some(
@@ -108,6 +106,13 @@ export default function StringAutocomplete({
             }
         }, 150);
     }, [value, onChange]);
+
+    // Cancel pending blur timer on unmount to avoid state updates on an unmounted component
+    useEffect(() => {
+        return () => {
+            if (blurTimerRef.current !== null) clearTimeout(blurTimerRef.current);
+        };
+    }, []);
 
     return (
         <div ref={wrapperRef} className="relative">

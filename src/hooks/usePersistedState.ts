@@ -26,6 +26,24 @@ interface PersistedBookingData {
     dismissedModelIds: string[];
 }
 
+function isValidPersistedData(data: unknown): data is PersistedBookingData {
+    if (typeof data !== "object" || data === null) return false;
+    const d = data as Record<string, unknown>;
+    return (
+        d.version === 3 &&
+        typeof d.clientName === "string" &&
+        typeof d.clientPhone === "string" &&
+        typeof d.manufacturerId === "string" &&
+        typeof d.modelId === "string" &&
+        typeof d.stringMain === "string" &&
+        typeof d.stringCross === "string" &&
+        typeof d.mainsTensionLbs === "string" &&
+        typeof d.crossTensionLbs === "string" &&
+        Array.isArray(d.dismissedModelIds) &&
+        (d.dismissedModelIds as unknown[]).every((id) => typeof id === "string")
+    );
+}
+
 /**
  * Reads persisted booking data from localStorage.
  * Returns null if nothing is stored, data is malformed, or the version is outdated.
@@ -38,10 +56,10 @@ export function loadPersistedData(): PersistedBookingData | null {
         const raw = window.localStorage.getItem(STORAGE_KEY);
         if (!raw) return null;
 
-        const parsed = JSON.parse(raw) as Partial<PersistedBookingData>;
-        if (parsed.version !== 3) return null; // stale schema — discard
+        const parsed: unknown = JSON.parse(raw);
+        if (!isValidPersistedData(parsed)) return null;
 
-        return parsed as PersistedBookingData;
+        return parsed;
     } catch {
         return null;
     }

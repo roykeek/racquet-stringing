@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
             try {
                 // Extract IP (works locally and on Vercel)
                 // NextRequest.ip is only available in Edge runtime, so we fall back to headers
-                const ip = request.headers.get("x-forwarded-for") ?? "anonymous";
+                const forwarded = request.headers.get("x-forwarded-for");
+                const ip = forwarded ? forwarded.split(",")[0].trim() : "anonymous";
                 const { success, limit, remaining, reset } = await ratelimit.limit(`history_api_${ip}`);
 
                 if (!success) {
@@ -52,8 +53,11 @@ export async function GET(request: NextRequest) {
                     );
                 }
             } catch (rlError) {
-                console.warn("Rate limit check failed (bypassing):", rlError);
-                // Fail-open: if Redis throws an error, allow the request to proceed.
+                console.error("Rate limit check failed:", rlError);
+                return NextResponse.json(
+                    { error: "Service temporarily unavailable. Please try again." },
+                    { status: 503 }
+                );
             }
         } else {
             console.warn("Upstash Redis credentials missing — rate limiting is DISABLED.");
@@ -111,7 +115,6 @@ async function queryClientHistory(phone: string, months: number | null) {
     const jobs = await prisma.serviceJob.findMany({
         where: {
             clientPhone: phone,
-            status: { not: "CANCELLED" },
             modelId: { not: null },
             ...(dateFilter.gte ? { createdAt: { gte: dateFilter.gte } } : {}),
         },

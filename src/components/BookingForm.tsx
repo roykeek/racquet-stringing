@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { format, addDays } from "date-fns";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +28,7 @@ export default function BookingForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [successTrackingId, setSuccessTrackingId] = useState<string | null>(null);
     const [isPreFilled, setIsPreFilled] = useState(false);
+    const router = useRouter();
 
     const {
         register,
@@ -37,8 +39,7 @@ export default function BookingForm({
         setValue,
         formState: { errors },
     } = useForm<BookingFormValues>({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        resolver: zodResolver(bookingSchema) as any,
+        resolver: zodResolver(bookingSchema) as Resolver<BookingFormValues>,
         defaultValues: {
             racquetCount: 1,
             stringMain: "",
@@ -197,7 +198,7 @@ export default function BookingForm({
                     </code>
                 </div>
                 <button
-                    onClick={() => window.location.reload()}
+                    onClick={() => router.push("/booking")}
                     className="text-white bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg font-medium transition"
                 >
                     בצע הזמנה חדשה

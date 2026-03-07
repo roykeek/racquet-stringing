@@ -230,9 +230,11 @@ export async function deactivateStringer(id: number) {
     }
 }
 
+export type DashboardJob = Awaited<ReturnType<typeof getJobsForDashboard>>[number];
+
 export async function getJobsForDashboard() {
     await requireStringerAuth();
-    return prisma.serviceJob.findMany({
+    const jobs = await prisma.serviceJob.findMany({
         include: {
             racquetModel: {
                 include: {
@@ -245,13 +247,23 @@ export async function getJobsForDashboard() {
             createdAt: "desc"
         }
     });
+
+    return jobs.map(job => ({
+        ...job,
+        mainsTensionLbs: job.mainsTensionLbs ? Number(job.mainsTensionLbs) : null,
+        crossTensionLbs: job.crossTensionLbs ? Number(job.crossTensionLbs) : null,
+    }));
 }
 
 export async function updateJobStatus(jobId: number, status: string, stringerId?: number, scheduledDate?: Date) {
     await requireStringerAuth();
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const data: any = { status };
+        const data: {
+            status: string;
+            stringerId?: number;
+            scheduledDate?: Date;
+            completedAt: Date | null;
+        } = { status, completedAt: null };
         if (stringerId) data.stringerId = stringerId;
         if (scheduledDate) data.scheduledDate = scheduledDate;
 
@@ -287,7 +299,10 @@ async function computeMaterialUsageReport(
     endDate?: Date,
     stringName?: string
 ): Promise<MaterialUsageData[]> {
-    const whereClause: any = {
+    const whereClause: {
+        status: string;
+        completedAt?: { gte?: Date; lte?: Date };
+    } = {
         status: "Completed",
     };
 

@@ -77,8 +77,7 @@ export default function RacquetHistoryChips({ phone, onChipClick }: RacquetHisto
     }, [phone]);
 
     const handleDismiss = useCallback(
-        (modelId: number, e: React.MouseEvent) => {
-            e.stopPropagation(); // Don't trigger chip click
+        (modelId: number) => {
             addDismissedModelId(String(modelId));
             setChips((prev) => {
                 const next = prev.filter((c) => c.modelId !== modelId);
@@ -103,15 +102,15 @@ export default function RacquetHistoryChips({ phone, onChipClick }: RacquetHisto
                 </p>
                 <div className="flex flex-col gap-2">
                     {chips.map((chip) => (
-                        <button
+                        <div
                             key={chip.modelId}
-                            type="button"
-                            onClick={() => onChipClick(chip)}
-                            className="group flex items-center justify-between gap-2 bg-white border border-emerald-200 
-                                       rounded-lg px-3 py-2.5 text-sm text-gray-800 hover:bg-emerald-50 
-                                       hover:border-emerald-400 transition-all cursor-pointer text-right"
+                            className="flex items-center bg-white border border-emerald-200 rounded-lg text-sm text-gray-800 hover:border-emerald-400 transition-all overflow-hidden"
                         >
-                            <span className="flex-1 truncate">
+                            <button
+                                type="button"
+                                onClick={() => onChipClick(chip)}
+                                className="flex-1 text-right px-3 py-2.5 hover:bg-emerald-50 transition-colors truncate"
+                            >
                                 <span className="font-semibold">{chip.manufacturerName} {chip.modelName}</span>
                                 {(chip.stringMain || chip.stringCross) && (
                                     <span className="text-gray-500">
@@ -127,16 +126,16 @@ export default function RacquetHistoryChips({ phone, onChipClick }: RacquetHisto
                                         <span dir="ltr">{chip.mainsTensionLbs}/{chip.crossTensionLbs} lbs</span>
                                     </span>
                                 )}
-                            </span>
-                            <span
-                                onClick={(e) => handleDismiss(chip.modelId, e)}
-                                className="flex-shrink-0 text-gray-300 hover:text-red-500 font-bold text-base 
-                                           leading-none transition-colors px-1"
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleDismiss(chip.modelId)}
+                                className="flex-shrink-0 text-gray-300 hover:text-red-500 font-bold text-base leading-none transition-colors px-3 py-2.5"
                                 aria-label={`הסר ${chip.modelName}`}
                             >
                                 ✕
-                            </span>
-                        </button>
+                            </button>
+                        </div>
                     ))}
                 </div>
             </div>

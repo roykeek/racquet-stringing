@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Wrench, LogOut, Phone, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { addStringer, logoutStringer, updateJobStatus, deactivateStringer } from "@/app/actions";
+import type { DashboardJob } from "@/app/actions";
 import { formatDate } from "@/lib/dateUtils";
 import ExcelExportButton from "./ExcelExportButton";
 import RestockAlerts from "./RestockAlerts";
@@ -15,8 +16,7 @@ export default function DashboardWrapper({
     stringers,
 }: {
     currentUser: { id: number; name: string };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    allJobs: any[];
+    allJobs: DashboardJob[];
     stringers: { id: number; name: string }[];
 }) {
     const router = useRouter();
@@ -48,6 +48,7 @@ export default function DashboardWrapper({
         // Basic schedule assigning to current day and current user for MVP
         const date = status === "Scheduled" ? new Date() : undefined;
         await updateJobStatus(jobId, status, stringerId, date);
+        router.refresh();
     };
 
     const handleAddStringer = async (e: React.FormEvent) => {
@@ -181,8 +182,8 @@ export default function DashboardWrapper({
                                         <JobCard
                                             key={job.id}
                                             job={job}
-                                            onAction={() => {
-                                                handleStatusChange(job.id, "Completed", currentUser.id);
+                                            onAction={async () => {
+                                                await handleStatusChange(job.id, "Completed", currentUser.id);
 
                                                 // Option 3: Click-to-Chat WhatsApp Trigger
                                                 if (job.clientPhone) {
@@ -199,7 +200,7 @@ export default function DashboardWrapper({
                                                 }
                                             }}
                                             actionText="סיים עבודה"
-                                            onSecondaryAction={() => handleStatusChange(job.id, "Scheduled", currentUser.id)}
+                                            onSecondaryAction={async () => handleStatusChange(job.id, "Scheduled", currentUser.id)}
                                             secondaryActionText="החזר ליומן"
                                             highlight="green"
                                         />
@@ -315,16 +316,35 @@ function JobCard({
     showAssignee = false,
     highlight = "gray"
 }: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    job: any,
-    onAction: () => void,
+    job: DashboardJob,
+    onAction: () => Promise<void>,
     actionText: string,
-    onSecondaryAction?: () => void,
+    onSecondaryAction?: () => Promise<void>,
     secondaryActionText?: string,
     showAssignee?: boolean,
     highlight?: "gray" | "yellow" | "green"
 }) {
+    const [isLoading, setIsLoading] = useState(false);
     const isImmediate = job.urgency === "Immediate";
+
+    const handleAction = async () => {
+        setIsLoading(true);
+        try {
+            await onAction();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSecondaryAction = async () => {
+        if (!onSecondaryAction) return;
+        setIsLoading(true);
+        try {
+            await onSecondaryAction();
+        } finally {
+            setIsLoading(false);
+        }
+    };
     const bgClasses = {
         gray: "bg-white border-gray-200 hover:border-blue-300",
         yellow: "bg-yellow-50 border-yellow-200",
@@ -361,16 +381,18 @@ function JobCard({
 
             <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-100/50">
                 <button
-                    onClick={onAction}
-                    className="flex-1 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium py-2 rounded-lg transition"
+                    onClick={handleAction}
+                    disabled={isLoading}
+                    className="flex-1 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-500 disabled:cursor-not-allowed text-white text-sm font-medium py-2 rounded-lg transition"
                 >
-                    {actionText}
+                    {isLoading ? "..." : actionText}
                 </button>
 
                 {onSecondaryAction && secondaryActionText && (
                     <button
-                        onClick={onSecondaryAction}
-                        className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium py-2 rounded-lg transition"
+                        onClick={handleSecondaryAction}
+                        disabled={isLoading}
+                        className="flex-1 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-700 border border-gray-300 text-sm font-medium py-2 rounded-lg transition"
                     >
                         {secondaryActionText}
                     </button>
@@ -384,7 +406,7 @@ function JobCard({
                     <Phone size={18} />
                 </a>
                 <a
-                    href={`https://wa.me/${job.clientPhone.replace(/\D/g, '')}`}
+                    href={`https://wa.me/${job.clientPhone.replace(/\D/g, '').replace(/^0/, '972')}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition"
