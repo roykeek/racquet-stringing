@@ -384,7 +384,7 @@ function JobCard({
                     <Phone size={18} />
                 </a>
                 <a
-                    href={`https://wa.me/${job.clientPhone.replace(/\D/g, '')}`}
+                    href={`https://wa.me/${job.clientPhone.replace(/\D/g, '').replace(/^0/, '972')}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg transition"

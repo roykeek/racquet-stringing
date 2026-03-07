@@ -111,7 +111,6 @@ async function queryClientHistory(phone: string, months: number | null) {
     const jobs = await prisma.serviceJob.findMany({
         where: {
             clientPhone: phone,
-            status: { not: "CANCELLED" },
             modelId: { not: null },
             ...(dateFilter.gte ? { createdAt: { gte: dateFilter.gte } } : {}),
         },
