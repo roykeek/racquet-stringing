@@ -9,8 +9,16 @@ export const bookingSchema = z.object({
     customRacquetInfo: z.string().optional(),
     stringMain: z.string().optional(),
     stringCross: z.string().optional(),
-    mainsTensionLbs: z.string().optional(),
-    crossTensionLbs: z.string().optional(),
+    mainsTensionLbs: z.string()
+        .optional()
+        .refine(val => !val || (Number(val) >= 30 && Number(val) <= 70), {
+            message: "המתיחה חייבת להיות בין 30 ל-70 Lbs",
+        }),
+    crossTensionLbs: z.string()
+        .optional()
+        .refine(val => !val || (Number(val) >= 30 && Number(val) <= 70), {
+            message: "המתיחה חייבת להיות בין 30 ל-70 Lbs",
+        }),
     racquetCount: z.coerce.number().min(1).default(1),
     urgency: z.enum(["Standard", "Express", "Immediate"]),
     dueDate: z.string().min(1, "יש לבחור תאריך מוערך"),

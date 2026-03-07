@@ -28,44 +28,49 @@ if (redisUrl && redisToken) {
  * Protected by strict rate limiting to prevent phone number enumeration.
  */
 export async function GET(request: NextRequest) {
-    // 1. Rate Limiting Check
-    if (ratelimit) {
-        // Extract IP (works locally and on Vercel)
-        // NextRequest.ip is only available in Edge runtime, so we fall back to headers
-        const ip = request.headers.get("x-forwarded-for") ?? "anonymous";
-        const { success, limit, remaining, reset } = await ratelimit.limit(`history_api_${ip}`);
+    try {
+        // 1. Rate Limiting Check
+        if (ratelimit) {
+            try {
+                // Extract IP (works locally and on Vercel)
+                // NextRequest.ip is only available in Edge runtime, so we fall back to headers
+                const ip = request.headers.get("x-forwarded-for") ?? "anonymous";
+                const { success, limit, remaining, reset } = await ratelimit.limit(`history_api_${ip}`);
 
-        if (!success) {
-            console.warn(`Rate limit exceeded for IP: ${ip}`);
-            return NextResponse.json(
-                { error: "Too many requests. Please try again later." },
-                {
-                    status: 429,
-                    headers: {
-                        "X-RateLimit-Limit": limit.toString(),
-                        "X-RateLimit-Remaining": remaining.toString(),
-                        "X-RateLimit-Reset": reset.toString(),
-                    },
+                if (!success) {
+                    console.warn(`Rate limit exceeded for IP: ${ip}`);
+                    return NextResponse.json(
+                        { error: "Too many requests. Please try again later." },
+                        {
+                            status: 429,
+                            headers: {
+                                "X-RateLimit-Limit": limit.toString(),
+                                "X-RateLimit-Remaining": remaining.toString(),
+                                "X-RateLimit-Reset": reset.toString(),
+                            },
+                        }
+                    );
                 }
+            } catch (rlError) {
+                console.warn("Rate limit check failed (bypassing):", rlError);
+                // Fail-open: if Redis throws an error, allow the request to proceed.
+            }
+        } else {
+            console.warn("Upstash Redis credentials missing — rate limiting is DISABLED.");
+        }
+
+        // 2. Phone Validation
+        const phone = request.nextUrl.searchParams.get("phone");
+
+        // Validate: must be a 10-digit Israeli mobile number
+        if (!phone || !/^05\d{8}$/.test(phone)) {
+            return NextResponse.json(
+                { error: "Invalid or missing phone parameter" },
+                { status: 400 }
             );
         }
-    } else {
-        console.warn("Upstash Redis credentials missing — rate limiting is DISABLED.");
-    }
 
-    // 2. Phone Validation
-    const phone = request.nextUrl.searchParams.get("phone");
-
-    // Validate: must be a 10-digit Israeli mobile number
-    if (!phone || !/^05\d{8}$/.test(phone)) {
-        return NextResponse.json(
-            { error: "Invalid or missing phone parameter" },
-            { status: 400 }
-        );
-    }
-
-    // 3. Query Database
-    try {
+        // 3. Query Database
         // Try 18-month window first
         let results = await queryClientHistory(phone, 18);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, KeyboardEvent } from "react";
 import { ChevronDown } from "lucide-react";
 
 interface SelectOption {
@@ -30,7 +30,9 @@ export default function CustomSelect({
     icon
 }: CustomSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [focusedIndex, setFocusedIndex] = useState(-1);
     const wrapperRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef<HTMLUListElement>(null);
 
     // Find the currently selected option to display its name
     const selectedOption = options.find(opt => String(opt.id) === String(value));
@@ -46,13 +48,78 @@ export default function CustomSelect({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Reset focused index when opened/closed
+    useEffect(() => {
+        if (!isOpen) {
+            setFocusedIndex(-1);
+        } else {
+            const currentIndex = options.findIndex(opt => String(opt.id) === String(value));
+            setFocusedIndex(currentIndex !== -1 ? currentIndex + 1 : 0);
+        }
+    }, [isOpen, options, value]);
+
+    // Scroll active item into view
+    useEffect(() => {
+        if (isOpen && focusedIndex >= 0 && listRef.current) {
+            const listItems = listRef.current.querySelectorAll("li");
+            if (focusedIndex < listItems.length) {
+                listItems[focusedIndex].scrollIntoView({ block: "nearest" });
+            }
+        }
+    }, [focusedIndex, isOpen]);
+
     const handleSelect = useCallback((optionValue: string | number) => {
         onChange(optionValue);
         setIsOpen(false);
     }, [onChange]);
 
+    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+        if (disabled) return;
+
+        if (!isOpen) {
+            if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown" || e.key === "ArrowUp") {
+                e.preventDefault();
+                setIsOpen(true);
+            }
+            return;
+        }
+
+        const totalItems = options.length + 1; // +1 for placeholder
+
+        switch (e.key) {
+            case "ArrowDown":
+                e.preventDefault();
+                setFocusedIndex(prev => (prev < totalItems - 1 ? prev + 1 : prev));
+                break;
+            case "ArrowUp":
+                e.preventDefault();
+                setFocusedIndex(prev => (prev > 0 ? prev - 1 : 0));
+                break;
+            case "Enter":
+            case " ":
+                e.preventDefault();
+                if (focusedIndex === 0) {
+                    handleSelect("");
+                } else if (focusedIndex > 0 && focusedIndex <= options.length) {
+                    handleSelect(options[focusedIndex - 1].id);
+                } else {
+                    setIsOpen(false);
+                }
+                break;
+            case "Escape":
+                e.preventDefault();
+                setIsOpen(false);
+                break;
+            case "Tab":
+                setIsOpen(false);
+                break;
+            default:
+                break;
+        }
+    };
+
     return (
-        <div ref={wrapperRef} className={`relative ${className}`}>
+        <div ref={wrapperRef} className={`relative ${className}`} onKeyDown={handleKeyDown}>
             <button
                 type="button"
                 className={`w-full flex items-center justify-between p-2.5 sm:p-3 bg-white border rounded-lg shadow-sm text-right transition-colors
@@ -74,31 +141,42 @@ export default function CustomSelect({
 
             {/* Dropdown Menu */}
             {isOpen && !disabled && (
-                <ul className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <ul ref={listRef} className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                     {/* Optional clear/placeholder selection */}
                     <li>
                         <button
                             type="button"
-                            className="w-full text-right px-4 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+                            className={`w-full text-right px-4 py-2.5 text-sm transition-colors border-l-4
+                                ${focusedIndex === 0 ? "bg-blue-100 text-blue-900 border-blue-500" : "border-transparent text-gray-500 hover:bg-gray-50"}
+                            `}
                             onClick={() => handleSelect("")}
+                            tabIndex={-1}
                         >
                             {placeholder}
                         </button>
                     </li>
 
-                    {options.map((option) => (
-                        <li key={option.id}>
-                            <button
-                                type="button"
-                                className={`w-full text-right px-4 py-2.5 text-sm transition-colors
-                                    ${String(value) === String(option.id) ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:bg-blue-50 hover:text-blue-700"}
-                                `}
-                                onClick={() => handleSelect(option.id)}
-                            >
-                                {option.name}
-                            </button>
-                        </li>
-                    ))}
+                    {options.map((option, index) => {
+                        const isFocused = focusedIndex === index + 1;
+                        const isSelected = String(value) === String(option.id);
+                        return (
+                            <li key={option.id}>
+                                <button
+                                    type="button"
+                                    className={`w-full text-right px-4 py-2.5 text-sm transition-colors border-l-4
+                                        ${isSelected ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:text-blue-700"}
+                                        ${isFocused && !isSelected ? "bg-blue-100 text-blue-900 border-blue-500" : "border-transparent"}
+                                        ${isSelected && isFocused ? "border-blue-700 bg-blue-200" : ""}
+                                        ${!isFocused && !isSelected ? "hover:bg-blue-50" : ""}
+                                    `}
+                                    onClick={() => handleSelect(option.id)}
+                                    tabIndex={-1}
+                                >
+                                    {option.name}
+                                </button>
+                            </li>
+                        );
+                    })}
                 </ul>
             )}
         </div>
