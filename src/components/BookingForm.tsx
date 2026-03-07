@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { format, addDays } from "date-fns";
 import { z } from "zod";
@@ -27,6 +28,7 @@ export default function BookingForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [successTrackingId, setSuccessTrackingId] = useState<string | null>(null);
     const [isPreFilled, setIsPreFilled] = useState(false);
+    const router = useRouter();
 
     const {
         register,
@@ -196,7 +198,7 @@ export default function BookingForm({
                     </code>
                 </div>
                 <button
-                    onClick={() => window.location.reload()}
+                    onClick={() => router.push("/booking")}
                     className="text-white bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg font-medium transition"
                 >
                     בצע הזמנה חדשה
