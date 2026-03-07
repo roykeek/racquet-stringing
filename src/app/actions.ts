@@ -2,6 +2,44 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { createHmac, timingSafeEqual } from "crypto";
+
+// ==========================================
+// SESSION TOKEN HELPERS
+// ==========================================
+
+function getSessionSecret(): string {
+    const secret = process.env.SESSION_SECRET;
+    if (!secret) throw new Error("SESSION_SECRET environment variable is not set.");
+    return secret;
+}
+
+function signToken(stringerId: number): string {
+    const payload = String(stringerId);
+    const sig = createHmac("sha256", getSessionSecret()).update(payload).digest("hex");
+    return `${payload}.${sig}`;
+}
+
+function verifyToken(token: string): number | null {
+    const dotIndex = token.lastIndexOf(".");
+    if (dotIndex === -1) return null;
+
+    const payload = token.slice(0, dotIndex);
+    const receivedSig = token.slice(dotIndex + 1);
+
+    const expectedSig = createHmac("sha256", getSessionSecret()).update(payload).digest("hex");
+
+    // Use timing-safe comparison to prevent timing attacks
+    try {
+        const match = timingSafeEqual(Buffer.from(receivedSig, "hex"), Buffer.from(expectedSig, "hex"));
+        if (!match) return null;
+    } catch {
+        return null;
+    }
+
+    const id = parseInt(payload, 10);
+    return isNaN(id) ? null : id;
+}
 
 export async function getManufacturers() {
     const manufacturers = await prisma.manufacturer.findMany({
@@ -64,6 +102,29 @@ export async function createServiceJob(data: {
 import * as bcrypt from "bcrypt";
 import { cookies } from "next/headers";
 
+/**
+ * Verifies the request is coming from an authenticated, active stringer.
+ * Throws an error if the cookie is missing, invalid, or the stringer is inactive.
+ * Call this at the start of every stringer-only Server Action.
+ */
+async function requireStringerAuth(): Promise<number> {
+    const cookieStore = await cookies();
+    const raw = cookieStore.get("stringerAuth")?.value;
+    if (!raw) throw new Error("Unauthorized");
+
+    const stringerId = verifyToken(raw);
+    if (stringerId === null) throw new Error("Unauthorized");
+
+    const stringer = await prisma.stringer.findUnique({
+        where: { id: stringerId },
+        select: { id: true, isActive: true },
+    });
+
+    if (!stringer || !stringer.isActive) throw new Error("Unauthorized");
+
+    return stringer.id;
+}
+
 export async function getStringers() {
     return prisma.stringer.findMany({
         where: { isActive: true },
@@ -114,9 +175,8 @@ export async function loginStringer(stringerId: number, passwordPlain: string) {
         });
     }
 
-    // Set highly simplified session cookie for MVP
     const cookieStore = await cookies();
-    cookieStore.set("stringerAuth", String(stringer.id), {
+    cookieStore.set("stringerAuth", signToken(stringer.id), {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 60 * 60 * 24 * 7, // 1 week
@@ -127,11 +187,13 @@ export async function loginStringer(stringerId: number, passwordPlain: string) {
 }
 
 export async function logoutStringer() {
+    await requireStringerAuth();
     const cookieStore = await cookies();
     cookieStore.delete("stringerAuth");
 }
 
 export async function addStringer(name: string, passwordPlain: string) {
+    await requireStringerAuth();
     try {
         const hashedPassword = await bcrypt.hash(passwordPlain, 10);
         await prisma.stringer.create({
@@ -149,6 +211,7 @@ export async function addStringer(name: string, passwordPlain: string) {
 }
 
 export async function deactivateStringer(id: number) {
+    await requireStringerAuth();
     try {
         const stringer = await prisma.stringer.findUnique({ where: { id } });
         if (stringer?.name === "Tomer") {
@@ -168,6 +231,7 @@ export async function deactivateStringer(id: number) {
 }
 
 export async function getJobsForDashboard() {
+    await requireStringerAuth();
     return prisma.serviceJob.findMany({
         include: {
             racquetModel: {
@@ -184,6 +248,7 @@ export async function getJobsForDashboard() {
 }
 
 export async function updateJobStatus(jobId: number, status: string, stringerId?: number, scheduledDate?: Date) {
+    await requireStringerAuth();
     try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const data: any = { status };
@@ -217,7 +282,7 @@ export type MaterialUsageData = {
     totalCount: number;
 };
 
-export async function getMaterialUsageReport(
+async function computeMaterialUsageReport(
     startDate?: Date,
     endDate?: Date,
     stringName?: string
@@ -271,11 +336,21 @@ export async function getMaterialUsageReport(
     return results;
 }
 
+export async function getMaterialUsageReport(
+    startDate?: Date,
+    endDate?: Date,
+    stringName?: string
+): Promise<MaterialUsageData[]> {
+    await requireStringerAuth();
+    return computeMaterialUsageReport(startDate, endDate, stringName);
+}
+
 export async function getRestockAlerts(threshold: number = 10, daysLookback: number = 30): Promise<{ stringName: string, count: number }[]> {
+    await requireStringerAuth();
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - daysLookback);
 
-    const report = await getMaterialUsageReport(thirtyDaysAgo, new Date());
+    const report = await computeMaterialUsageReport(thirtyDaysAgo, new Date());
 
     return report
         .filter(item => item.totalCount >= threshold)
@@ -283,6 +358,7 @@ export async function getRestockAlerts(threshold: number = 10, daysLookback: num
 }
 
 export async function getJobsForExport(startDate: Date, endDate: Date) {
+    await requireStringerAuth();
     const twoYearsAgo = new Date();
     twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
 
