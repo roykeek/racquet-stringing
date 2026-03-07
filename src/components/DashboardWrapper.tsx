@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Wrench, LogOut, Phone, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { addStringer, logoutStringer, updateJobStatus, deactivateStringer } from "@/app/actions";
+import type { DashboardJob } from "@/app/actions";
 import { formatDate } from "@/lib/dateUtils";
 import ExcelExportButton from "./ExcelExportButton";
 import RestockAlerts from "./RestockAlerts";
@@ -15,8 +16,7 @@ export default function DashboardWrapper({
     stringers,
 }: {
     currentUser: { id: number; name: string };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    allJobs: any[];
+    allJobs: DashboardJob[];
     stringers: { id: number; name: string }[];
 }) {
     const router = useRouter();
@@ -316,8 +316,7 @@ function JobCard({
     showAssignee = false,
     highlight = "gray"
 }: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    job: any,
+    job: DashboardJob,
     onAction: () => Promise<void>,
     actionText: string,
     onSecondaryAction?: () => Promise<void>,

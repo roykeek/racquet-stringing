@@ -18,12 +18,6 @@ export default function ExcelExportButton() {
     const [endDate, setEndDate] = useState(new Date().toISOString().split("T")[0]);
     const [isExporting, setIsExporting] = useState(false);
 
-    // Calculate max and min dates for the HTML inputs
-    const todayStr = new Date().toISOString().split("T")[0];
-    const twoYearsAgo = new Date();
-    twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
-    const twoYearsAgoStr = twoYearsAgo.toISOString().split("T")[0];
-
     const exportToExcel = async () => {
         setIsExporting(true);
         try {
@@ -68,9 +62,9 @@ export default function ExcelExportButton() {
                     phone: job.clientPhone,
                     racquetModel: job.racquetModel ? `${job.racquetModel.manufacturer.name} ${job.racquetModel.name} ` : "Unknown",
                     stringMains: job.stringMain || "N/A",
-                    mainsTension: job.mainsTensionLbs ? Number(job.mainsTensionLbs) : "",
+                    mainsTension: job.mainsTensionLbs ?? "",
                     stringCrosses: job.stringCross || "N/A",
-                    crossesTension: job.crossTensionLbs ? Number(job.crossTensionLbs) : "",
+                    crossesTension: job.crossTensionLbs ?? "",
                     completedDate: job.completedAt ? formatDate(job.completedAt) : (job.status === "Completed" ? "Completed (No Date)" : "N/A"),
                     stringerName: job.stringer?.name || "Unassigned",
                     status: job.status,

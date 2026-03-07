@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, type Resolver } from "react-hook-form";
 import { format, addDays } from "date-fns";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,8 +37,7 @@ export default function BookingForm({
         setValue,
         formState: { errors },
     } = useForm<BookingFormValues>({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        resolver: zodResolver(bookingSchema) as any,
+        resolver: zodResolver(bookingSchema) as Resolver<BookingFormValues>,
         defaultValues: {
             racquetCount: 1,
             stringMain: "",

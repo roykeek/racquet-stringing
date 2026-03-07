@@ -24,16 +24,8 @@ export default async function StringerDashboard() {
         redirect("/");
     }
 
-    // Fetch all jobs
-    const rawJobs = await getJobsForDashboard();
-
-    // Convert Prisma Decimal fields to plain JavaScript numbers to avoid Next.js serialization errors
-    // when passing data from Server Components to Client Components.
-    const allJobs = rawJobs.map(job => ({
-        ...job,
-        mainsTensionLbs: Number(job.mainsTensionLbs),
-        crossTensionLbs: Number(job.crossTensionLbs)
-    }));
+    // Fetch all jobs (Decimal fields are pre-converted to numbers inside the action)
+    const allJobs = await getJobsForDashboard();
     const stringers = await getStringers();
 
     return (
