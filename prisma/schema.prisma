@@ -31,6 +31,7 @@ model Stringer {
   isActive            Boolean      @default(true)
   failedLoginAttempts Int          @default(0)
   lockedUntil         DateTime?
+  clearedHistoryAt    DateTime?
   serviceJobs         ServiceJob[]
 }
 

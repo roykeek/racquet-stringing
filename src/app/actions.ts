@@ -233,7 +233,13 @@ export async function deactivateStringer(id: number) {
 export type DashboardJob = Awaited<ReturnType<typeof getJobsForDashboard>>[number];
 
 export async function getJobsForDashboard() {
-    await requireStringerAuth();
+    const stringerId = await requireStringerAuth();
+
+    const stringer = await prisma.stringer.findUnique({
+        where: { id: stringerId },
+        select: { clearedHistoryAt: true },
+    });
+
     const jobs = await prisma.serviceJob.findMany({
         include: {
             racquetModel: {
@@ -248,11 +254,29 @@ export async function getJobsForDashboard() {
         }
     });
 
-    return jobs.map(job => ({
-        ...job,
-        mainsTensionLbs: job.mainsTensionLbs ? Number(job.mainsTensionLbs) : null,
-        crossTensionLbs: job.crossTensionLbs ? Number(job.crossTensionLbs) : null,
-    }));
+    const clearedAt = stringer?.clearedHistoryAt ?? null;
+
+    return jobs
+        .filter(job => {
+            if (job.status !== "Completed") return true;
+            if (!clearedAt || !job.completedAt) return true;
+            return job.completedAt > clearedAt;
+        })
+        .map(job => ({
+            ...job,
+            mainsTensionLbs: job.mainsTensionLbs ? Number(job.mainsTensionLbs) : null,
+            crossTensionLbs: job.crossTensionLbs ? Number(job.crossTensionLbs) : null,
+        }));
+}
+
+export async function clearCompletedHistory() {
+    const stringerId = await requireStringerAuth();
+    await prisma.stringer.update({
+        where: { id: stringerId },
+        data: { clearedHistoryAt: new Date() },
+    });
+    revalidatePath("/stringer");
+    return { success: true };
 }
 
 export async function updateJobStatus(jobId: number, status: string, stringerId?: number, scheduledDate?: Date) {
