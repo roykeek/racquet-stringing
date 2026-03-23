@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Wrench, LogOut, Phone, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { addStringer, logoutStringer, updateJobStatus, deactivateStringer } from "@/app/actions";
+import { addStringer, logoutStringer, updateJobStatus, deactivateStringer, clearCompletedHistory } from "@/app/actions";
 import type { DashboardJob } from "@/app/actions";
 import { formatDate } from "@/lib/dateUtils";
 import ExcelExportButton from "./ExcelExportButton";
@@ -38,6 +38,13 @@ export default function DashboardWrapper({
     const completedJobs = allJobs.filter(
         (j) => j.status === "Completed" && j.stringerId === currentUser.id
     );
+
+    const handleClearHistory = async () => {
+        if (window.confirm("האם אתה בטוח שברצונך למחוק את ההיסטוריה? הנתונים ישמרו במערכת לצורכי דוחות וייצוא.")) {
+            await clearCompletedHistory();
+            router.refresh();
+        }
+    };
 
     const handleLogout = async () => {
         await logoutStringer();
@@ -220,6 +227,16 @@ export default function DashboardWrapper({
                                         </div>
                                     ))
                                 )}
+                            </div>
+
+                            <div className="mt-4 pt-4 border-t border-emerald-100 text-center">
+                                <button
+                                    onClick={handleClearHistory}
+                                    disabled={completedJobs.length === 0}
+                                    className="w-full bg-red-50 hover:bg-red-100 disabled:opacity-40 disabled:cursor-not-allowed text-red-700 font-semibold py-3 px-4 rounded-xl transition border border-red-200 shadow-sm text-sm mb-4"
+                                >
+                                    נקה היסטוריה
+                                </button>
                             </div>
 
                             <div className="mt-4 pt-4 border-t border-emerald-100 text-center">
