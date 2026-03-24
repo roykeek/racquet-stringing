@@ -29,6 +29,8 @@ export default function DashboardWrapper({
     const [stringerToDeactivate, setStringerToDeactivate] = useState("");
     const [deactivateError, setDeactivateError] = useState("");
 
+    const [whatsappJob, setWhatsappJob] = useState<DashboardJob | null>(null);
+
     // Sub-filter the jobs into columns
     const waitingQueue = allJobs.filter((j) => j.status === "Waiting");
     const scheduledJobs = allJobs.filter((j) => j.status === "Scheduled");
@@ -191,19 +193,8 @@ export default function DashboardWrapper({
                                             job={job}
                                             onAction={async () => {
                                                 await handleStatusChange(job.id, "Completed", currentUser.id);
-
-                                                // Option 3: Click-to-Chat WhatsApp Trigger
                                                 if (job.clientPhone) {
-                                                    const cleanPhone = job.clientPhone.replace(/\D/g, "");
-                                                    // Optional: If Israeli number starts with 0, replace with 972
-                                                    const formattedPhone = cleanPhone.startsWith("0")
-                                                        ? `972${cleanPhone.substring(1)}`
-                                                        : cleanPhone;
-
-                                                    const message = `היי ${job.clientName}, המחבט שלך מוכן לאיסוף! 🎾`;
-                                                    const waLink = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
-
-                                                    window.open(waLink, "_blank");
+                                                    setWhatsappJob(job);
                                                 }
                                             }}
                                             actionText="סיים עבודה"
@@ -317,6 +308,44 @@ export default function DashboardWrapper({
                     <MaterialUsageReport />
                 </section>
             </main>
+
+            {/* WhatsApp Confirmation Modal */}
+            {whatsappJob && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" dir="rtl">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                                <MessageCircle className="text-green-600" size={22} />
+                            </div>
+                            <h2 className="text-lg font-bold text-gray-900">שליחת הודעת וואטסאפ</h2>
+                        </div>
+                        <p className="text-gray-600 text-sm">
+                            האם לשלוח הודעה ל<strong>{whatsappJob.clientName}</strong> שהמחבט מוכן לאיסוף?
+                        </p>
+                        <div className="flex gap-3 pt-2">
+                            <button
+                                onClick={() => {
+                                    const cleanPhone = whatsappJob.clientPhone.replace(/\D/g, "");
+                                    const formattedPhone = cleanPhone.startsWith("0") ? `972${cleanPhone.substring(1)}` : cleanPhone;
+                                    const message = `היי ${whatsappJob.clientName}, המחבט שלך מוכן לאיסוף! 🎾`;
+                                    window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, "_blank");
+                                    setWhatsappJob(null);
+                                }}
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2"
+                            >
+                                <MessageCircle size={16} />
+                                שלח הודעה
+                            </button>
+                            <button
+                                onClick={() => setWhatsappJob(null)}
+                                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl transition text-sm"
+                            >
+                                דלג
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
