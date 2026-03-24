@@ -27,12 +27,12 @@ export default function RestockAlerts() {
     if (loading || alerts.length === 0) return null;
 
     return (
-        <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 rounded-r-md">
+        <div className="mb-6 bg-white border-l-4 border-amber-500 p-4 rounded-r-md shadow-sm">
             <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="text-amber-600 dark:text-amber-500 w-5 h-5" />
-                <h3 className="font-bold text-amber-800 dark:text-amber-400">התראות מלאי</h3>
+                <AlertCircle className="text-amber-500 w-5 h-5" />
+                <h3 className="font-bold text-gray-900">התראות מלאי</h3>
             </div>
-            <ul className="list-disc list-inside text-amber-700 dark:text-amber-300 space-y-1 ml-1 text-sm">
+            <ul className="list-disc list-inside text-gray-700 space-y-1 ml-1 text-sm">
                 {alerts.map(alert => (
                     <li key={alert.stringName}>
                         השתמשת ב-<strong>{alert.stringName}</strong> ב-{alert.count} עבודות ב-30 הימים האחרונים — כדאי לחדש מלאי?
