@@ -384,16 +384,18 @@ export async function getMaterialUsageReport(
     return computeMaterialUsageReport(startDate, endDate, stringName);
 }
 
-export async function getRestockAlerts(threshold: number = 10, daysLookback: number = 30): Promise<{ stringName: string, count: number }[]> {
-    await requireStringerAuth();
+export async function getRestockAlerts(threshold: number = 10, daysLookback: number = 30): Promise<{ alerts: { stringName: string, count: number }[], stringerId: number }> {
+    const stringerId = await requireStringerAuth();
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - daysLookback);
 
     const report = await computeMaterialUsageReport(thirtyDaysAgo, new Date());
 
-    return report
+    const alerts = report
         .filter(item => item.totalCount >= threshold)
         .map(item => ({ stringName: item.stringName, count: item.totalCount }));
+
+    return { alerts, stringerId };
 }
 
 export async function getJobsForExport(startDate: Date, endDate: Date) {
