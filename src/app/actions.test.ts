@@ -186,6 +186,20 @@ describe('Server Actions (API Layer)', () => {
         });
 
         it('getRestockAlerts() should return strings that meet or exceed the threshold', async () => {
+            // Set up valid stringer auth
+            process.env.SESSION_SECRET = 'test-secret';
+            const { createHmac } = require('crypto');
+            const payload = '1';
+            const sig = createHmac('sha256', 'test-secret').update(payload).digest('hex');
+            const validToken = `${payload}.${sig}`;
+
+            (jest.requireMock('next/headers').cookies as jest.Mock).mockResolvedValue({
+                get: jest.fn((name: string) => name === 'stringerAuth' ? { value: validToken } : undefined),
+                set: jest.fn(),
+                delete: jest.fn(),
+            });
+            prismaMock.stringer.findUnique.mockResolvedValue({ id: 1, isActive: true } as any);
+
             // Fake the findMany return directly for the internal call
             const fakeJobs = Array(10).fill({ stringMain: 'Popular String', stringCross: null });
             fakeJobs.push({ stringMain: 'Rare String', stringCross: null });
@@ -195,9 +209,10 @@ describe('Server Actions (API Layer)', () => {
             const { getRestockAlerts } = require('./actions');
             const result = await getRestockAlerts(10, 30); // threshold 10
 
-            expect(result).toHaveLength(1);
-            expect(result[0].stringName).toBe('Popular String');
-            expect(result[0].count).toBe(10);
+            expect(result.stringerId).toBe(1);
+            expect(result.alerts).toHaveLength(1);
+            expect(result.alerts[0].stringName).toBe('Popular String');
+            expect(result.alerts[0].count).toBe(10);
 
             // Should add completedAt date filters to findMany
             expect(prismaMock.serviceJob.findMany).toHaveBeenCalledWith(
