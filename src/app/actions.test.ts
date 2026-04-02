@@ -18,6 +18,18 @@ jest.mock('bcrypt', () => ({
     hash: jest.fn(),
 }));
 
+function setupStringerAuth(id = 1) {
+    process.env.SESSION_SECRET = 'test-secret';
+    const { createHmac } = require('crypto');
+    const sig = createHmac('sha256', 'test-secret').update(String(id)).digest('hex');
+    (jest.requireMock('next/headers').cookies as jest.Mock).mockResolvedValue({
+        get: jest.fn((name: string) => name === 'stringerAuth' ? { value: `${id}.${sig}` } : undefined),
+        set: jest.fn(),
+        delete: jest.fn(),
+    });
+    prismaMock.stringer.findUnique.mockResolvedValue({ id, isActive: true } as any);
+}
+
 describe('Server Actions (API Layer)', () => {
 
     describe('Read Operations', () => {
@@ -120,6 +132,7 @@ describe('Server Actions (API Layer)', () => {
         });
 
         it('updateJobStatus() should set completedAt when status is Completed', async () => {
+            setupStringerAuth();
             prismaMock.serviceJob.update.mockResolvedValue({} as any);
             const { updateJobStatus } = require('./actions');
 
@@ -137,6 +150,7 @@ describe('Server Actions (API Layer)', () => {
         });
 
         it('updateJobStatus() should clear completedAt when status reverts from Completed', async () => {
+            setupStringerAuth();
             prismaMock.serviceJob.update.mockResolvedValue({} as any);
             const { updateJobStatus } = require('./actions');
 
@@ -153,7 +167,9 @@ describe('Server Actions (API Layer)', () => {
     });
 
     describe('Reporting Operations', () => {
+
         it('getMaterialUsageReport() should aggregate string mains and crosses correctly', async () => {
+            setupStringerAuth();
             const fakeJobs = [
                 { stringMain: 'RPM Blast', stringCross: 'VS Touch' },
                 { stringMain: 'RPM Blast', stringCross: 'RPM Blast' },
@@ -186,21 +202,7 @@ describe('Server Actions (API Layer)', () => {
         });
 
         it('getRestockAlerts() should return strings that meet or exceed the threshold', async () => {
-            // Set up valid stringer auth
-            process.env.SESSION_SECRET = 'test-secret';
-            const { createHmac } = require('crypto');
-            const payload = '1';
-            const sig = createHmac('sha256', 'test-secret').update(payload).digest('hex');
-            const validToken = `${payload}.${sig}`;
-
-            (jest.requireMock('next/headers').cookies as jest.Mock).mockResolvedValue({
-                get: jest.fn((name: string) => name === 'stringerAuth' ? { value: validToken } : undefined),
-                set: jest.fn(),
-                delete: jest.fn(),
-            });
-            prismaMock.stringer.findUnique.mockResolvedValue({ id: 1, isActive: true } as any);
-
-            // Fake the findMany return directly for the internal call
+            setupStringerAuth();
             const fakeJobs = Array(10).fill({ stringMain: 'Popular String', stringCross: null });
             fakeJobs.push({ stringMain: 'Rare String', stringCross: null });
 
@@ -227,7 +229,9 @@ describe('Server Actions (API Layer)', () => {
                 })
             );
         });
+
         it('getJobsForExport() should return jobs within the specified date range', async () => {
+            setupStringerAuth();
             const fakeJobs = [{ id: 1, clientName: 'Export Test' }];
             prismaMock.serviceJob.findMany.mockResolvedValue(fakeJobs as any);
 
@@ -253,6 +257,7 @@ describe('Server Actions (API Layer)', () => {
         });
 
         it('getJobsForExport() should throw an error if startDate is older than 2 years', async () => {
+            setupStringerAuth();
             const { getJobsForExport } = require('./actions');
 
             const oldDate = new Date();
@@ -274,6 +279,7 @@ describe('Server Actions (API Layer)', () => {
                 failedLoginAttempts: 0,
                 lockedUntil: null,
                 isActive: true,
+                clearedHistoryAt: null,
             };
 
             prismaMock.stringer.findUnique.mockResolvedValue(mockStringer);
